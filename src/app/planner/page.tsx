@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { supabase } from '../../lib/supabase';
+import { getSupabase } from '../../lib/supabase';
 import styles from '../page.module.css';
 import Link from 'next/link';
 import { Home, Users, BookOpen, Calendar, Wand2 } from 'lucide-react';
@@ -17,13 +17,16 @@ export default function PlannerPage() {
   const [generatedPosts, setGeneratedPosts] = useState<any[] | null>(null);
 
   useEffect(() => {
-    async function fetchClients() {
+    const loadClients = async () => {
+      const supabase = getSupabase();
+      if (!supabase) return;
+
       const { data } = await supabase.from('clients').select('id, name');
       if (data) {
         setClients(data);
       }
-    }
-    fetchClients();
+    };
+    loadClients();
   }, []);
 
   const handleGenerate = async () => {

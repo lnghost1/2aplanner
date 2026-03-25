@@ -1,9 +1,15 @@
 import { GoogleGenAI } from '@google/genai';
 
-if (!process.env.GEMINI_API_KEY) {
-  console.warn("WARNING: GEMINI_API_KEY environment variable is not defined");
-}
+let aiInstance: any = null;
 
-export const ai = new GoogleGenAI({ 
-  apiKey: process.env.GEMINI_API_KEY 
-});
+export function getGemini() {
+  if (aiInstance) return aiInstance;
+  
+  const apiKey = process.env.GEMINI_API_KEY || '';
+  if (!apiKey) {
+    return null;
+  }
+  
+  aiInstance = new GoogleGenAI({ apiKey });
+  return aiInstance;
+}

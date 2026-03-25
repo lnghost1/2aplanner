@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '../../../lib/supabase';
+import { getSupabase } from '../../../lib/supabase';
 import styles from '../../page.module.css';
 import Link from 'next/link';
 import { Home, Users, BookOpen, Calendar, ArrowLeft } from 'lucide-react';
@@ -21,6 +21,9 @@ export default function NewClientPage() {
     setLoading(true);
 
     try {
+      const supabase = getSupabase();
+      if (!supabase) throw new Error('Supabase not initialized');
+
       const { error } = await supabase.from('clients').insert([{
         name: formData.name,
         industry: formData.industry,

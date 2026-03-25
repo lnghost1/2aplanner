@@ -1,17 +1,19 @@
 import { NextResponse } from 'next/server';
-import { ai } from '../../../lib/gemini';
-import { supabase } from '../../../lib/supabase';
+import { getGemini } from '../../../lib/gemini';
+import { getSupabase } from '../../../lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
+  const supabase = getSupabase();
+  const ai = getGemini();
+
   try {
     const { clientId, month, postCount, campaignFocus } = await request.json();
 
     // 1. Fetch Client Briefing from Supabase
-    // We check if supabase is initialized (not null from our guard in lib/supabase.ts)
-    if (!supabase) {
-      return NextResponse.json({ error: 'Sistema de banco de dados não inicializado.' }, { status: 500 });
+    if (!supabase || !ai) {
+      return NextResponse.json({ error: 'Sistema não inicializado (Chaves de API ausentes).' }, { status: 500 });
     }
 
     const { data: client, error: clientError } = await supabase

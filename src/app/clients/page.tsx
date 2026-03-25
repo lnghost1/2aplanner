@@ -1,4 +1,4 @@
-import { supabase } from '../../lib/supabase';
+import { getSupabase } from '../../lib/supabase';
 import styles from '../page.module.css';
 import Link from 'next/link';
 import { Home, Users, BookOpen, Calendar, Search, Plus } from 'lucide-react';
@@ -6,6 +6,9 @@ import { Home, Users, BookOpen, Calendar, Search, Plus } from 'lucide-react';
 export const revalidate = 0; // Disable cache to always show newest clients
 
 export default async function ClientsPage() {
+  const supabase = getSupabase();
+  if (!supabase) return <div>Erro de configuração (Supabase)</div>;
+
   const { data: clients, error } = await supabase
     .from('clients')
     .select('*')

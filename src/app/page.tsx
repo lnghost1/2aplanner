@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase';
+import { getSupabase } from '../lib/supabase';
 import styles from "./page.module.css";
 import Link from 'next/link';
 import { Home, Users, BookOpen, Calendar, Activity, Zap } from 'lucide-react';
@@ -6,6 +6,9 @@ import { Home, Users, BookOpen, Calendar, Activity, Zap } from 'lucide-react';
 export const revalidate = 0; // Disable cache so the dashboard is always live
 
 export default async function Dashboard() {
+  const supabase = getSupabase();
+  if (!supabase) return <div>Erro de configuração (Supabase)</div>;
+
   const { count: clientsCount } = await supabase
     .from('clients')
     .select('*', { count: 'exact', head: true });
