@@ -1,7 +1,7 @@
 import { getSupabase } from '../../../lib/supabase';
 import styles from "../../page.module.css";
 import Link from 'next/link';
-import { ArrowLeft, User, Building, FileText, Image as ImageIcon, Video, File, Trash2, Zap, Calendar } from 'lucide-react';
+import { ArrowLeft, User, Building, FileText, Image as ImageIcon, Video, File, Trash2, Zap, Calendar, Home, Users, BookOpen } from 'lucide-react';
 import { notFound } from 'next/navigation';
 
 export const revalidate = 0;
@@ -25,22 +25,31 @@ export default async function ClientDetail({ params }: { params: { id: string } 
     .select('*')
     .eq('client_id', params.id);
 
+  const { data: plans } = await supabase
+    .from('content_plans')
+    .select('*')
+    .eq('client_id', params.id)
+    .order('created_at', { ascending: false });
+
   return (
     <div className={styles.container}>
       {/* Sidebar Navigation */}
-      <aside className={styles.sidebar}>
+      <aside className={styles.sidebar_nav}>
         <div className={styles.logo}>
           2A <span>PLANNER</span>
         </div>
         <nav className={styles.nav}>
           <Link href="/" className={styles.navItem}>
-            <ArrowLeft size={20} className={styles.navIcon} /> Voltar
+            <Home size={20} className={styles.navIcon} /> Visão Geral
           </Link>
-          <Link href={`/clients/${params.id}`} className={`${styles.navItem} ${styles.navItemActive}`}>
-            <User size={20} className={styles.navIcon} /> Perfil do Cliente
+          <Link href="/clients" className={styles.navItem}>
+            <Users size={20} className={styles.navIcon} /> Clientes
+          </Link>
+          <Link href="/knowledge" className={styles.navItem}>
+             <BookOpen size={20} className={styles.navIcon} /> Base da IA
           </Link>
           <Link href="/planner" className={styles.navItem}>
-            <Calendar size={20} className={styles.navIcon} /> Gerar Plano
+            <Calendar size={20} className={styles.navIcon} /> Planejador
           </Link>
         </nav>
       </aside>
@@ -69,8 +78,31 @@ export default async function ClientDetail({ params }: { params: { id: string } 
                 <FileText size={18} /> Briefing Estratégico
               </h3>
             </div>
-            <div style={{ color: 'var(--text-color)', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
+            <div style={{ color: 'var(--text-color)', lineHeight: '1.6', whiteSpace: 'pre-wrap', marginBottom: '32px' }}>
               {client.briefing || 'Nenhum briefing cadastrado.'}
+            </div>
+
+            <div className={styles.cardHeader}>
+              <h3 className={styles.cardTitle} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Zap size={18} color="var(--accent-red)" /> Histórico de Planos (IA)
+              </h3>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {plans && plans.length > 0 ? (
+                plans.map((plan: any) => (
+                  <div key={plan.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', backgroundColor: '#111', borderRadius: '8px', border: '1px solid #222' }}>
+                    <div>
+                      <span style={{ fontWeight: 600, color: '#fff' }}>{plan.platform} - {plan.month}</span>
+                      <p style={{ fontSize: '12px', color: '#666' }}>{new Date(plan.created_at).toLocaleDateString()}</p>
+                    </div>
+                    <Link href={`/planner?planId=${plan.id}`} className={styles.btnSecondary} style={{ padding: '4px 12px', fontSize: '12px' }}>
+                      Ver Plano
+                    </Link>
+                  </div>
+                ))
+              ) : (
+                <p style={{ fontSize: '14px', color: '#666' }}>Nenhum plano gerado ainda.</p>
+              )}
             </div>
           </section>
 

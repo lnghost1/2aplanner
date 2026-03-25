@@ -1,113 +1,30 @@
 import { NextResponse } from 'next/server';
-import { getGemini } from '../../../lib/gemini';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { getSupabase } from '../../../lib/supabase';
 
-export const dynamic = 'force-dynamic';
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
-export async function POST(request: Request) {
-  const supabase = getSupabase();
-  const ai = getGemini();
-
+export async function POST(req: Request) {
   try {
-    const { clientId, month, postCount, campaignFocus } = await request.json();
+    const { clientId, month, platform } = await req.json();
+    const supabase = getSupabase();
+    if (!supabase) return NextResponse.json({ error: 'Supabase offline' }, { status: 500 });
 
-    if (!supabase || !ai) {
-      return NextResponse.json({ error: 'Sistema não inicializado (Chaves de API ausentes).' }, { status: 500 });
-    }
+    const { data: client } = await supabase.from('clients').select('*').eq('id', clientId).single();
+    const { data: kb } = await supabase.from('knowledge_base').select('*').maybeSingle();
+    const { data: assets } = await supabase.from('client_assets').select('file_name, file_type').eq('client_id', clientId);
 
-    // 1. Fetch Client Data
-    const { data: client, error: clientError } = await supabase
-      .from('clients')
-      .select('name, industry, briefing')
-      .eq('id', clientId)
-      .single();
+    // VARIAVEL NOVA PARA TESTAR SINCRO
+    const assetListULTRA_FIX = (assets || []).map((item: any) => `- ${item.file_name}`).join('\n');
 
-    if (clientError || !client) {
-      return NextResponse.json({ error: 'Erro ao buscar dados do cliente.' }, { status: 400 });
-    }
-
-    // 2. Fetch Knowledge Base (Superpowers)
-    const { data: kb } = await supabase
-      .from('knowledge_base')
-      .select('*')
-      .single();
-
-    // 3. Fetch Client Assets (Context)
-    const { data: assets } = await supabase
-      .from('client_assets')
-      .select('file_name, file_type')
-      .eq('client_id', clientId);
-
-    const assetList = assets?.map(a => `- ${a.file_name} (${a.file_type})`).join('\n') || 'Nenhum arquivo adicional anexado.';
-
-    // 4. Build Multi-modal / Multi-framework Prompt
-    const prompt = `
-Você é um Especialista em Copywriting de Resposta Direta e Estrategista de Conteúdo sênior da 2A Assessoria.
-Sua missão é criar um calendário editorial de elite, focando em gerar desejo imediato e autoridade inquestionável para o cliente.
-
-[DADOS DO CLIENTE]
-Nome: ${client.name}
-Nicho: ${client.industry}
-Briefing Estratégico:
-${client.briefing}
-
-[MATERIAIS DE APOIO ANALISADOS]
-O cliente enviou os seguintes arquivos de branding que você deve considerar (estilo visual e tom):
-${assetList}
-
-[DIRETRIZES DA AGÊNCIA 2A (SUPERPODERES)]
-Metodologias de Copy a serem aplicadas: ${kb?.copy_frameworks || 'AIDA, PAS, Storytelling'}
-Regras de Ouro: ${kb?.rules}
-Filtro de Qualidade (O que NÃO fazer): ${kb?.negative_prompt}
-
-[DADOS DO PLANEJAMENTO]
-Mês/Ano Alvo: ${month}
-Quantidade: ${postCount} posts
-${campaignFocus ? `Foco da Campanha: ${campaignFocus}` : ''}
-
-[ESTRUTURA DE SAÍDA - RIGOROSA]
-- Retorne APENAS um array JSON puro. SEM markdown.
-- Cada objeto deve seguir esta estrutura:
-  {
-    "date": "Data (dd/mm - Dia)",
-    "theme": "Raciocínio Estratégico (Pq este post hoje?)",
-    "format": "Formato (Ex: Reels de Conexão, Carrossel Educativo)",
-    "hook": "Headline/Gancho de IMPACTO (Superpoder de Copy)",
-    "caption": "Legenda completa com Gatilhos Mentais e CTA forte",
-    "visual_direction": "Instrução para design baseada nos materiais de apoio"
-  }
-`;
-
-    // 5. Call Gemini
-    const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash', // Optimization: Using 1.5-flash for reliability
-      contents: prompt,
-      config: {
-        maxOutputTokens: 8192,
-        temperature: kb?.temperature || 0.7,
-      }
-    });
-
-    const text = response.text || "[]";
-    let cleanedText = text.trim();
-    if (cleanedText.startsWith('```json')) cleanedText = cleanedText.slice(7);
-    if (cleanedText.startsWith('```')) cleanedText = cleanedText.slice(3);
-    if (cleanedText.endsWith('```')) cleanedText = cleanedText.slice(0, -3);
+    const prompt = `Gere plano para ${client?.name} no ${platform} para ${month}. Regras: ${kb?.copy_frameworks}. Contexto: ${assetListULTRA_FIX}`;
     
-    let generatedPosts = [];
-    try {
-      generatedPosts = JSON.parse(cleanedText.trim());
-    } catch {
-      console.error("JSON Parse Error. Data:", text);
-      return NextResponse.json({ error: 'Falha na estruturação estratégica do conteúdo.' }, { status: 500 });
-    }
-
-    // 6. Update Client Status
-    await supabase.from('clients').update({ status: 'complete' }).eq('id', clientId);
-
-    return NextResponse.json(generatedPosts);
-  } catch (error: any) {
-    console.error('Generation Error:', error);
-    return NextResponse.json({ error: error.message || 'Erro Interno do Servidor' }, { status: 500 });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const result = await model.generateContent(prompt);
+    const text = (await result.response).text().replace(/```json/g, "").replace(/```/g, "").trim();
+    
+    return NextResponse.json(JSON.parse(text));
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

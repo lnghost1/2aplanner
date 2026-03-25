@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { getSupabase } from '../../lib/supabase';
 import styles from '../page.module.css';
 import Link from 'next/link';
-import { Home, Users, BookOpen, Calendar, Wand2 } from 'lucide-react';
+import { Home, Users, BookOpen, Calendar, Wand2, Copy, Check, Globe, Share2, Save } from 'lucide-react';
 
 export default function PlannerPage() {
   const [clients, setClients] = useState<any[]>([]);
@@ -12,26 +12,25 @@ export default function PlannerPage() {
   const [month, setMonth] = useState('');
   const [postCount, setPostCount] = useState(12);
   const [campaignFocus, setCampaignFocus] = useState('');
+  const [platform, setPlatform] = useState('Instagram');
   
   const [generating, setGenerating] = useState(false);
   const [generatedPosts, setGeneratedPosts] = useState<any[] | null>(null);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const loadClients = async () => {
       const supabase = getSupabase();
       if (!supabase) return;
-
       const { data } = await supabase.from('clients').select('id, name');
-      if (data) {
-        setClients(data);
-      }
+      if (data) setClients(data);
     };
     loadClients();
   }, []);
 
   const handleGenerate = async () => {
     if (!selectedClient || !month) {
-      alert('Por favor, selecione o cliente e o mês para gerar o planejamento.');
+      alert('Selecione o cliente e o mês.');
       return;
     }
     
@@ -46,166 +45,182 @@ export default function PlannerPage() {
           clientId: selectedClient,
           month,
           postCount,
-          campaignFocus
+          campaignFocus,
+          platform
         })
       });
       
       const data = await res.json();
-      
-      if (!res.ok) {
-        throw new Error(data.error || 'Erro desconhecido');
-      }
-      
+      if (!res.ok) throw new Error(data.error || 'Erro desconhecido');
       setGeneratedPosts(data);
     } catch (error: any) {
-      console.error(error);
-      alert('Erro ao gerar posts: ' + error.message);
+      alert('Erro ao gerar: ' + error.message);
     } finally {
       setGenerating(false);
     }
   };
 
+  const handleCopy = (text: string, index: number) => {
+    navigator.clipboard.writeText(text);
+    setCopiedIndex(index);
+    setTimeout(() => setCopiedIndex(null), 2000);
+  };
+
+  const handleSavePlan = async () => {
+    const supabase = getSupabase();
+    if (!supabase || !generatedPosts) return;
+
+    const { error } = await supabase.from('content_plans').insert([{
+      client_id: selectedClient,
+      platform,
+      month,
+      posts: generatedPosts,
+      status: 'saved'
+    }]);
+
+    if (error) alert('Erro ao salvar plano: ' + error.message);
+    else alert('Plano salvo estrategicamente no histórico!');
+  };
+
   return (
     <div className={styles.container}>
-      <aside className={styles.sidebar}>
-        <div className={styles.logo}>
-          2A <span>PLANNER</span>
-        </div>
+      <aside className={styles.sidebar_nav}>
+        <div className={styles.logo}>2A <span>PLANNER</span></div>
         <nav className={styles.nav}>
-          <Link href="/" className={styles.navItem}>
-            <Home size={20} className={styles.navIcon} /> Visão Geral
-          </Link>
-          <Link href="/clients" className={styles.navItem}>
-            <Users size={20} className={styles.navIcon} /> Clientes
-          </Link>
-          <Link href="/knowledge" className={styles.navItem}>
-            <BookOpen size={20} className={styles.navIcon} /> Base da IA
-          </Link>
-          <Link href="/planner" className={`${styles.navItem} ${styles.navItemActive}`}>
-            <Calendar size={20} className={styles.navIcon} /> Planejador
-          </Link>
+          <Link href="/" className={styles.navItem}><Home size={20} /> Visão Geral</Link>
+          <Link href="/clients" className={styles.navItem}><Users size={20} /> Clientes</Link>
+          <Link href="/knowledge" className={styles.navItem}><BookOpen size={20} /> Base da IA</Link>
+          <Link href="/planner" className={`${styles.navItem} ${styles.navItemActive}`}><Calendar size={20} /> Planejador</Link>
         </nav>
       </aside>
 
       <main className={styles.main}>
         <header className={styles.header}>
-          <h1 className={styles.title}>Planejador de Conteúdo AI</h1>
-          <button 
-            onClick={handleGenerate}
-            disabled={generating}
-            className={styles.btnPrimary} 
-            style={{ backgroundColor: generating ? '#6b7280' : '#10b981' }}
-          >
-            <Wand2 size={18} style={{ marginRight: '8px' }} /> 
-            {generating ? 'Pensando como um Estrategista...' : 'Gerar Posts'}
-          </button>
+          <h1 className={styles.title}>Planejador Premium</h1>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            {generatedPosts && (
+              <button onClick={handleSavePlan} className={styles.btnSecondary}>
+                <Save size={18} /> Salvar no Histórico
+              </button>
+            )}
+            <button 
+              onClick={handleGenerate} 
+              disabled={generating} 
+              className={styles.btnPrimary}
+            >
+              <Wand2 size={18} /> {generating ? 'Criando Estratégia...' : 'Gerar Planejamento'}
+            </button>
+          </div>
         </header>
 
-        <div style={{ display: 'flex', gap: '32px', alignItems: 'flex-start' }}>
-          
-          <section className={styles.formSection} style={{ flex: '1', minWidth: '400px', position: 'sticky', top: '100px' }}>
-            <h3 style={{ marginBottom: '24px', fontSize: '18px' }}>Configuração do Planejamento</h3>
-            <div className={styles.clientForm}>
-              
-              <div className={styles.formGroup}>
-                <label>Selecione o Cliente</label>
-                <select 
-                  className={styles.inputField}
-                  value={selectedClient}
-                  onChange={(e) => setSelectedClient(e.target.value)}
+        <div className={styles.splitLayout}>
+          {/* PAINEL LATERAL DE CONFIGURAÇÃO */}
+          <section className={styles.sidebar}>
+            <h3 style={{ marginBottom: '20px', fontSize: '16px', color: '#fff' }}>⚙️ Configuração</h3>
+            
+            <div className={styles.formGroup}>
+              <label>Rede Social</label>
+              <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                <button 
+                  onClick={() => setPlatform('Instagram')}
+                  className={`${styles.copyButton} ${platform === 'Instagram' ? styles.postTag : ''}`}
+                  style={{ flex: 1, display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'center' }}
                 >
-                  <option value="">Selecione um cliente...</option>
-                   {clients.map((c: any) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
+                  <Globe size={16} /> Instagram
+                </button>
+                <button 
+                  onClick={() => setPlatform('LinkedIn')}
+                  className={`${styles.copyButton} ${platform === 'LinkedIn' ? styles.postTag : ''}`}
+                  style={{ flex: 1, display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'center' }}
+                >
+                  <Share2 size={16} /> LinkedIn
+                </button>
               </div>
+            </div>
 
-              <div className={styles.formGroup} style={{ display: 'flex', gap: '16px' }}>
-                <div style={{ flex: 1 }}>
-                  <label>Mês / Ano</label>
-                  <input 
-                    type="month" 
-                    className={styles.inputField} 
-                    value={month} 
-                    onChange={e => setMonth(e.target.value)} 
-                  />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <label>Qtd. de Posts</label>
-                  <input 
-                    type="number" 
-                    min="1" max="30" 
-                    value={postCount} 
-                    onChange={e => setPostCount(Number(e.target.value))} 
-                    className={styles.inputField} 
-                  />
-                </div>
-              </div>
+            <div className={styles.formGroup}>
+              <label>Cliente</label>
+              <select className={styles.inputField} value={selectedClient} onChange={e => setSelectedClient(e.target.value)}>
+                <option value="">Selecione...</option>
+                {clients.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
 
-              <div className={styles.formGroup}>
-                <label>Foco Especial (Opcional)</label>
-                <textarea 
-                  rows={3} 
-                  placeholder="Ex: Foco na campanha de páscoa e odontopediatria..."
-                  className={styles.textareaField}
-                  value={campaignFocus}
-                  onChange={e => setCampaignFocus(e.target.value)}
-                />
-              </div>
+            <div className={styles.formGroup}>
+              <label>Mês / Ano</label>
+              <input type="month" className={styles.inputField} value={month} onChange={e => setMonth(e.target.value)} />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label>Posts por Mês</label>
+              <input type="number" min="1" max="30" value={postCount} onChange={e => setPostCount(Number(e.target.value))} className={styles.inputField} />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label>Foco da Campanha</label>
+              <textarea rows={4} className={styles.textareaField} value={campaignFocus} onChange={e => setCampaignFocus(e.target.value)} placeholder="Ex: Lançamento de produto X, Foco em autoridade..." />
             </div>
           </section>
 
-          <section className={styles.viewSection} style={{ flex: '2' }}>
-            <h3 style={{ marginBottom: '24px', fontSize: '18px' }}>Prévia do Mês</h3>
-            
+          {/* ÁREA DE CONTEÚDO (RESULTADOS) */}
+          <section className={styles.contentArea}>
             {!generatedPosts && !generating && (
-              <div style={{ height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed var(--card-border)', borderRadius: 'var(--radius-md)' }}>
-                <div style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
-                  <Calendar size={48} style={{ marginBottom: '16px', opacity: 0.5 }} />
-                  <p>O calendário inteligente aparecerá aqui após a geração da IA.</p>
-                </div>
+              <div style={{ textAlign: 'center', padding: '100px 0', color: '#666' }}>
+                <Calendar size={64} style={{ marginBottom: '20px', opacity: 0.2 }} />
+                <p>Configure à esquerda e clique em <b>Gerar Planejamento</b>.</p>
               </div>
             )}
 
             {generating && (
-               <div style={{ height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed var(--card-border)', borderRadius: 'var(--radius-md)' }}>
-                 <div style={{ textAlign: 'center', color: 'var(--primary)' }}>
-                   <Wand2 size={48} style={{ marginBottom: '16px', animation: 'pulse 2s infinite' }} />
-                   <p>A inteligência artificial está lendo o briefing e<br/>criando a estratégia perfeita...</p>
-                 </div>
-               </div>
-            )}
-
-            {generatedPosts && generatedPosts.length > 0 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                {generatedPosts.map((post: any, idx) => (
-                  <div key={idx} style={{ padding: '24px', backgroundColor: 'var(--bg-darker)', borderRadius: 'var(--radius-md)', border: '1px solid var(--card-border)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', alignItems: 'center' }}>
-                      <span style={{ fontWeight: 700, color: 'var(--primary)', fontSize: '18px' }}>🗓️ {post.date}</span>
-                      <span style={{ fontSize: '13px', fontWeight: 600, padding: '6px 12px', backgroundColor: '#222', border: '1px solid #444', borderRadius: '8px' }}>📺 {post.format}</span>
-                    </div>
-                    
-                    <h4 style={{ fontSize: '18px', marginBottom: '12px', color: '#fff' }}>🎯 {post.theme}</h4>
-                    <p style={{ fontWeight: 600, marginBottom: '16px', color: '#e2e8f0', backgroundColor: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '8px' }}>
-                      🔥 Hook: &quot;{post.hook}&quot;
-                    </p>
-                    
-                    <div style={{ color: 'var(--text-muted)', fontSize: '15px', lineHeight: '1.6', marginBottom: '20px', whiteSpace: 'pre-wrap' }}>
-                      {post.caption}
-                    </div>
-                    
-                    <div style={{ padding: '16px', backgroundColor: 'rgba(224, 36, 36, 0.1)', borderLeft: '4px solid var(--primary)', borderRadius: '4px', fontSize: '14px' }}>
-                      <strong style={{ color: 'var(--primary)', display: 'block', marginBottom: '4px' }}>🎨 Direção Visual e Design:</strong> 
-                      <span style={{ color: '#e2e8f0' }}>{post.visual_direction}</span>
-                    </div>
-                  </div>
-                ))}
+              <div style={{ textAlign: 'center', padding: '100px 0', color: 'var(--accent-red)' }}>
+                <Wand2 size={64} style={{ marginBottom: '20px', animation: 'pulse 2s infinite' }} />
+                <p>Acelerando o motor de copy da 2A...</p>
               </div>
             )}
-            
-          </section>
 
+            {generatedPosts && generatedPosts.map((post: any, idx) => (
+              <div key={idx} className={styles.postCard}>
+                <div className={styles.postHeader}>
+                  <span className={styles.postDateField}>📅 {post.date}</span>
+                  <span className={styles.postTag}>{post.format}</span>
+                </div>
+
+                <h3 style={{ color: '#fff', fontSize: '1.2rem', marginBottom: '1rem' }}>🎯 {post.theme}</h3>
+                
+                <div className={styles.strategyBox}>
+                  <span className={styles.strategyLabel}>Gancho (Hook)</span>
+                  <p style={{ fontWeight: 600 }}>{post.hook}</p>
+                </div>
+
+                <div className={styles.strategyBox}>
+                  <span className={styles.strategyLabel}>Roteiro Estratégico</span>
+                  <p style={{ color: '#ccc', fontSize: '0.9rem' }}>{post.content_structure}</p>
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Legenda / Copy</label>
+                  <div style={{ position: 'relative' }}>
+                    <div className={styles.textareaField} style={{ minHeight: '100px', backgroundColor: '#050505', color: '#eee', padding: '12px' }}>
+                      {post.caption}
+                      <div className={styles.hashtags}>{post.hashtags}</div>
+                      <div style={{ marginTop: '1rem', color: 'var(--accent-red)', fontWeight: 'bold' }}>CTA: {post.cta}</div>
+                    </div>
+                    <button 
+                      onClick={() => handleCopy(`${post.caption}\n\n${post.hashtags}\n\n${post.cta}`, idx)}
+                      className={styles.copyButton}
+                      style={{ position: 'absolute', top: '10px', right: '10px' }}
+                    >
+                      {copiedIndex === idx ? <Check size={16} color="#10b981" /> : <Copy size={16} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: '1.5rem', fontSize: '0.85rem', color: '#888', fontStyle: 'italic' }}>
+                  🎨 <b>Design:</b> {post.visual_direction}
+                </div>
+              </div>
+            ))}
+          </section>
         </div>
       </main>
     </div>
