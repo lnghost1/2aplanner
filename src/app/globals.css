@@ -1,0 +1,59 @@
+:root {
+  /* Colors - Native Dark Mode & Red Accents */
+  --bg-color: #050505;
+  --bg-secondary: #0a0a0a;
+  --text-color: #f5f5f5;
+  --text-muted: #a3a3a3;
+  
+  --primary: #e11d48; /* Premium Red Accent */
+  --primary-hover: #be123c;
+  
+  --card-bg: #121212;
+  --card-border: #262626;
+  --card-hover: #1c1c1c;
+
+  /* Layout & Metrics */
+  --max-width: 1200px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html, body {
+  max-width: 100vw;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Custom Scrollbar for Dark Mode */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-color);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--card-border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
