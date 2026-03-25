@@ -1,7 +1,7 @@
 import { getSupabase } from '../lib/supabase';
 import styles from "./page.module.css";
 import Link from 'next/link';
-import { Home, Users, BookOpen, Calendar, Activity, Zap } from 'lucide-react';
+import { Home, Users, BookOpen, Calendar, Activity, Zap, Wand2, DollarSign } from 'lucide-react';
 
 export const revalidate = 0;
 
@@ -29,14 +29,22 @@ export default async function Dashboard() {
       .select('*', { count: 'exact', head: true })
       .eq('status', 'pending');
 
-    if (error1 || error2) {
-      throw new Error(`Erro Supabase: ${error1?.message || error2?.message}`);
+    const { data: plansData, error: error3 } = await supabase
+      .from('content_plans')
+      .select('posts');
+
+    const postsCount = (plansData || []).reduce((acc: number, p: any) => {
+      return acc + (Array.isArray(p.posts) ? p.posts.length : 0);
+    }, 0);
+
+    if (error1 || error2 || error3) {
+      throw new Error(`Erro Supabase: ${error1?.message || error2?.message || error3?.message}`);
     }
 
     return (
       <div className={styles.container}>
         {/* Sidebar Navigation */}
-        <aside className={styles.sidebar}>
+        <aside className={styles.sidebar_nav}>
           <div className={styles.logo}>
             2A <span>PLANNER</span>
           </div>
@@ -51,7 +59,13 @@ export default async function Dashboard() {
               <BookOpen size={20} className={styles.navIcon} /> Base da IA
             </Link>
             <Link href="/planner" className={styles.navItem}>
-              <Calendar size={20} className={styles.navIcon} /> Planejador
+              <Wand2 size={20} className={styles.navIcon} /> Planejador
+            </Link>
+            <Link href="/calendar" className={styles.navItem}>
+              <Calendar size={20} className={styles.navIcon} /> Calendário
+            </Link>
+            <Link href="/finance" className={styles.navItem}>
+              <DollarSign size={20} className={styles.navIcon} /> Financeiro
             </Link>
           </nav>
         </aside>
@@ -87,7 +101,7 @@ export default async function Dashboard() {
                 <h3 className={styles.cardTitle}>Posts Gerados</h3>
                 <Activity size={20} color="var(--primary)" />
               </div>
-              <p className={styles.cardValue}>0</p>
+              <p className={styles.cardValue}>{postsCount}</p>
             </div>
           </section>
         </main>

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { getSupabase } from '../../lib/supabase';
 import styles from '../page.module.css';
 import Link from 'next/link';
-import { Home, Users, BookOpen, Calendar, Wand2, Copy, Check, Globe, Share2, Save } from 'lucide-react';
+import { Home, Users, BookOpen, Calendar, Wand2, Copy, Check, Globe, Share2, Save, DollarSign } from 'lucide-react';
 
 export default function PlannerPage() {
   const [clients, setClients] = useState<any[]>([]);
@@ -16,6 +16,7 @@ export default function PlannerPage() {
   
   const [generating, setGenerating] = useState(false);
   const [generatedPosts, setGeneratedPosts] = useState<any[] | null>(null);
+  const [activeTabs, setActiveTabs] = useState<{[key: number]: string}>({});
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
   useEffect(() => {
@@ -53,6 +54,11 @@ export default function PlannerPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erro desconhecido');
       setGeneratedPosts(data);
+      
+      // Inicializar abas
+      const initialTabs: any = {};
+      data.forEach((p: any) => initialTabs[p.id] = 'caption');
+      setActiveTabs(initialTabs);
     } catch (error: any) {
       alert('Erro ao gerar: ' + error.message);
     } finally {
@@ -90,7 +96,9 @@ export default function PlannerPage() {
           <Link href="/" className={styles.navItem}><Home size={20} /> Visão Geral</Link>
           <Link href="/clients" className={styles.navItem}><Users size={20} /> Clientes</Link>
           <Link href="/knowledge" className={styles.navItem}><BookOpen size={20} /> Base da IA</Link>
-          <Link href="/planner" className={`${styles.navItem} ${styles.navItemActive}`}><Calendar size={20} /> Planejador</Link>
+          <Link href="/planner" className={`${styles.navItem} ${styles.navItemActive}`}><Wand2 size={20} /> Planejador</Link>
+          <Link href="/calendar" className={styles.navItem}><Calendar size={20} /> Calendário</Link>
+          <Link href="/finance" className={styles.navItem}><DollarSign size={20} /> Financeiro</Link>
         </nav>
       </aside>
 
@@ -121,20 +129,18 @@ export default function PlannerPage() {
             <div className={styles.formGroup}>
               <label>Rede Social</label>
               <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
-                <button 
+                <div 
+                  className={`${styles.platformOption} ${platform === 'Instagram' ? styles.platformActive : ''}`}
                   onClick={() => setPlatform('Instagram')}
-                  className={`${styles.copyButton} ${platform === 'Instagram' ? styles.postTag : ''}`}
-                  style={{ flex: 1, display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'center' }}
                 >
-                  <Globe size={16} /> Instagram
-                </button>
-                <button 
-                  onClick={() => setPlatform('LinkedIn')}
-                  className={`${styles.copyButton} ${platform === 'LinkedIn' ? styles.postTag : ''}`}
-                  style={{ flex: 1, display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'center' }}
+                  <Globe size={16} /> Instagram / Reels
+                </div>
+                <div 
+                  className={`${styles.platformOption} ${platform === 'Facebook' ? styles.platformActive : ''}`}
+                  onClick={() => setPlatform('Facebook')}
                 >
-                  <Share2 size={16} /> LinkedIn
-                </button>
+                  <Share2 size={16} /> Facebook
+                </div>
               </div>
             </div>
 
@@ -179,44 +185,85 @@ export default function PlannerPage() {
             )}
 
             {generatedPosts && generatedPosts.map((post: any, idx) => (
-              <div key={idx} className={styles.postCard}>
+              <div key={post.id || idx} className={styles.postCard}>
                 <div className={styles.postHeader}>
-                  <span className={styles.postDateField}>📅 {post.date}</span>
-                  <span className={styles.postTag}>{post.format}</span>
+                  <span className={styles.postTag}>Post #{idx + 1}</span>
+                  <h3 className={styles.postTopic}>{post.topic}</h3>
+                  {post.format && (
+                    <span style={{ fontSize: '0.7rem', color: '#888', background: '#1a1a1a', padding: '4px 8px', borderRadius: '6px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      {post.format}
+                    </span>
+                  )}
                 </div>
-
-                <h3 style={{ color: '#fff', fontSize: '1.2rem', marginBottom: '1rem' }}>🎯 {post.theme}</h3>
                 
-                <div className={styles.strategyBox}>
-                  <span className={styles.strategyLabel}>Gancho (Hook)</span>
-                  <p style={{ fontWeight: 600 }}>{post.hook}</p>
+                <p className={styles.postStrategy}><strong>🎯 Estratégia:</strong> {post.strategy}</p>
+
+                <div className={styles.postTabs}>
+                  <button 
+                    className={`${styles.tabButton} ${activeTabs[post.id] === 'hooks' ? styles.tabActive : ''}`}
+                    onClick={() => setActiveTabs({...activeTabs, [post.id]: 'hooks'})}
+                  >
+                    Ganchos
+                  </button>
+                  <button 
+                    className={`${styles.tabButton} ${activeTabs[post.id] === 'caption' ? styles.tabActive : ''}`}
+                    onClick={() => setActiveTabs({...activeTabs, [post.id]: 'caption'})}
+                  >
+                    Legenda
+                  </button>
+                  <button 
+                    className={`${styles.tabButton} ${activeTabs[post.id] === 'video' ? styles.tabActive : ''}`}
+                    onClick={() => setActiveTabs({...activeTabs, [post.id]: 'video'})}
+                  >
+                    Roteiro
+                  </button>
+                  <button 
+                    className={`${styles.tabButton} ${activeTabs[post.id] === 'visual' ? styles.tabActive : ''}`}
+                    onClick={() => setActiveTabs({...activeTabs, [post.id]: 'visual'})}
+                  >
+                    Visual
+                  </button>
                 </div>
 
-                <div className={styles.strategyBox}>
-                  <span className={styles.strategyLabel}>Roteiro Estratégico</span>
-                  <p style={{ color: '#ccc', fontSize: '0.9rem' }}>{post.content_structure}</p>
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Legenda / Copy</label>
-                  <div style={{ position: 'relative' }}>
-                    <div className={styles.textareaField} style={{ minHeight: '100px', backgroundColor: '#050505', color: '#eee', padding: '12px' }}>
-                      {post.caption}
-                      <div className={styles.hashtags}>{post.hashtags}</div>
-                      <div style={{ marginTop: '1rem', color: 'var(--accent-red)', fontWeight: 'bold' }}>CTA: {post.cta}</div>
+                <div className={styles.tabContent}>
+                  {activeTabs[post.id] === 'hooks' && (
+                    <div className={styles.hooksList}>
+                      {post.hook_options?.map((h: string, i: number) => (
+                        <div key={i} className={styles.hookItem}>
+                          <span>{i+1}.</span> {h}
+                        </div>
+                      ))}
                     </div>
-                    <button 
-                      onClick={() => handleCopy(`${post.caption}\n\n${post.hashtags}\n\n${post.cta}`, idx)}
-                      className={styles.copyButton}
-                      style={{ position: 'absolute', top: '10px', right: '10px' }}
-                    >
-                      {copiedIndex === idx ? <Check size={16} color="#10b981" /> : <Copy size={16} />}
-                    </button>
-                  </div>
+                  )}
+
+                  {activeTabs[post.id] === 'caption' && (
+                    <div className={styles.captionArea}>
+                      <pre className={styles.captionText}>{post.caption}</pre>
+                      <button 
+                        className={styles.copyButtonSmall}
+                        onClick={() => handleCopy(post.caption, idx)}
+                      >
+                        {copiedIndex === idx ? <Check size={14} /> : <Copy size={14} />} 
+                        {copiedIndex === idx ? 'Copiado!' : 'Copiar Legenda'}
+                      </button>
+                    </div>
+                  )}
+
+                  {activeTabs[post.id] === 'video' && (
+                    <div className={styles.videoArea}>
+                      <pre className={styles.videoText}>{post.video_script}</pre>
+                    </div>
+                  )}
+
+                  {activeTabs[post.id] === 'visual' && (
+                    <div className={styles.visualArea}>
+                      <p>{post.visual_suggestion}</p>
+                    </div>
+                  )}
                 </div>
 
-                <div style={{ marginTop: '1.5rem', fontSize: '0.85rem', color: '#888', fontStyle: 'italic' }}>
-                  🎨 <b>Design:</b> {post.visual_direction}
+                <div className={styles.postFooter}>
+                  <span className={styles.hashtags}>{post.hashtags}</span>
                 </div>
               </div>
             ))}

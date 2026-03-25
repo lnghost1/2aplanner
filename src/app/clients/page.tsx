@@ -1,7 +1,7 @@
 import { getSupabase } from '../../lib/supabase';
 import styles from '../page.module.css';
 import Link from 'next/link';
-import { Home, Users, BookOpen, Calendar, Search, Plus } from 'lucide-react';
+import { Home, Users, BookOpen, Calendar, Search, Plus, Wand2, DollarSign } from 'lucide-react';
 
 export const revalidate = 0; // Disable cache to always show newest clients
 
@@ -21,7 +21,7 @@ export default async function ClientsPage() {
   return (
     <div className={styles.container}>
       {/* Sidebar Navigation */}
-      <aside className={styles.sidebar}>
+      <aside className={styles.sidebar_nav}>
         <div className={styles.logo}>
           2A <span>PLANNER</span>
         </div>
@@ -36,7 +36,13 @@ export default async function ClientsPage() {
             <BookOpen size={20} className={styles.navIcon} /> Base da IA
           </Link>
           <Link href="/planner" className={styles.navItem}>
-            <Calendar size={20} className={styles.navIcon} /> Planejador
+            <Wand2 size={20} className={styles.navIcon} /> Planejador
+          </Link>
+          <Link href="/calendar" className={styles.navItem}>
+            <Calendar size={20} className={styles.navIcon} /> Calendário
+          </Link>
+          <Link href="/finance" className={styles.navItem}>
+            <DollarSign size={20} className={styles.navIcon} /> Financeiro
           </Link>
         </nav>
       </aside>

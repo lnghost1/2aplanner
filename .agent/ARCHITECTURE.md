@@ -32,28 +32,28 @@ Antigravity Kit is a modular system consisting of:
 
 Specialist AI personas for different domains.
 
-| Agent                    | Focus                      | Skills Used                                              |
+| Agente                    | Foco                       | Skills Usadas                                            |
 | ------------------------ | -------------------------- | -------------------------------------------------------- |
-| `orchestrator`           | Multi-agent coordination   | parallel-agents, behavioral-modes                        |
-| `project-planner`        | Discovery, task planning   | brainstorming, plan-writing, architecture                |
-| `frontend-specialist`    | Web UI/UX                  | frontend-design, react-best-practices, tailwind-patterns |
-| `backend-specialist`     | API, business logic        | api-patterns, nodejs-best-practices, database-design     |
-| `database-architect`     | Schema, SQL                | database-design, prisma-expert                           |
-| `mobile-developer`       | iOS, Android, RN           | mobile-design                                            |
-| `game-developer`         | Game logic, mechanics      | game-development                                         |
-| `devops-engineer`        | CI/CD, Docker              | deployment-procedures, docker-expert                     |
-| `security-auditor`       | Security compliance        | vulnerability-scanner, red-team-tactics                  |
-| `penetration-tester`     | Offensive security         | red-team-tactics                                         |
-| `test-engineer`          | Testing strategies         | testing-patterns, tdd-workflow, webapp-testing           |
-| `debugger`               | Root cause analysis        | systematic-debugging                                     |
-| `performance-optimizer`  | Speed, Web Vitals          | performance-profiling                                    |
-| `seo-specialist`         | Ranking, visibility        | seo-fundamentals, geo-fundamentals                       |
-| `documentation-writer`   | Manuals, docs              | documentation-templates                                  |
-| `product-manager`        | Requirements, user stories | plan-writing, brainstorming                              |
-| `product-owner`          | Strategy, backlog, MVP     | plan-writing, brainstorming                              |
-| `qa-automation-engineer` | E2E testing, CI pipelines  | webapp-testing, testing-patterns                         |
-| `code-archaeologist`     | Legacy code, refactoring   | clean-code, code-review-checklist                        |
-| `explorer-agent`         | Codebase analysis          | -                                                        |
+| `orquestrador`           | Coordenação multi-agente   | parallel-agents, behavioral-modes                        |
+| `planejador-de-projeto`  | Descoberta, planejamento   | brainstorming, plan-writing, architecture                |
+| `especialista-frontend`  | Web UI/UX                  | frontend-design, react-best-practices, tailwind-patterns |
+| `especialista-backend`   | API, lógica de negócio     | api-patterns, nodejs-best-practices, database-design     |
+| `arquiteto-de-banco-de-dados` | Esquema, SQL            | database-design, prisma-expert                           |
+| `desenvolvedor-mobile`   | iOS, Android, RN           | mobile-design                                            |
+| `desenvolvedor-de-jogos` | Lógica de jogo, mecânicas  | game-development                                         |
+| `engenheiro-devops`      | CI/CD, Docker              | deployment-procedures, docker-expert                     |
+| `auditor-de-seguranca`   | Conformidade de segurança  | vulnerability-scanner, red-team-tactics                  |
+| `tester-de-penetracao`   | Segurança ofensiva         | red-team-tactics                                         |
+| `engenheiro-de-testes`   | Estratégias de teste       | testing-patterns, tdd-workflow, webapp-testing           |
+| `depurador`              | Análise de causa raiz      | systematic-debugging                                     |
+| `otimizador-de-performance` | Velocidade, Web Vitals  | performance-profiling                                    |
+| `especialista-seo`       | Ranking, visibilidade      | seo-fundamentals, geo-fundamentals                       |
+| `escritor-de-documentacao` | Manuais, docs             | documentation-templates                                  |
+| `gerente-de-produto`     | Requisitos, user stories   | plan-writing, brainstorming                              |
+| `dono-do-produto`        | Estratégia, backlog, MVP   | plan-writing, brainstorming                              |
+| `engenheiro-de-automacao-qa` | Testes E2E, pipelines CI | webapp-testing, testing-patterns                         |
+| `arqueologo-de-codigo`   | Código legado, refatoração | clean-code, code-review-checklist                        |
+| `explorador`             | Análise de codebase        | -                                                        |
 
 ---
 
@@ -276,13 +276,13 @@ For details, see [scripts/README.md](scripts/README.md)
 
 ## 🔗 Quick Reference
 
-| Need     | Agent                 | Skills                                |
+| Need     | Agente                 | Skills                                |
 | -------- | --------------------- | ------------------------------------- |
-| Web App  | `frontend-specialist` | react-best-practices, frontend-design |
-| API      | `backend-specialist`  | api-patterns, nodejs-best-practices   |
-| Mobile   | `mobile-developer`    | mobile-design                         |
-| Database | `database-architect`  | database-design, prisma-expert        |
-| Security | `security-auditor`    | vulnerability-scanner                 |
-| Testing  | `test-engineer`       | testing-patterns, webapp-testing      |
-| Debug    | `debugger`            | systematic-debugging                  |
-| Plan     | `project-planner`     | brainstorming, plan-writing           |
+| Web App  | `especialista-frontend` | react-best-practices, frontend-design |
+| API      | `especialista-backend`  | api-patterns, nodejs-best-practices   |
+| Mobile   | `desenvolvedor-mobile`    | mobile-design                         |
+| Database | `arquiteto-de-banco-de-dados`  | database-design, prisma-expert        |
+| Security | `auditor-de-seguranca`    | vulnerability-scanner                 |
+| Testing  | `engenheiro-de-testes`       | testing-patterns, webapp-testing      |
+| Debug    | `depurador`            | systematic-debugging                  |
+| Plan     | `planejador-de-projeto`     | brainstorming, plan-writing           |

@@ -43,9 +43,20 @@
   cursor: pointer;
   display: flex;
   align-items: center;
+  gap: 10px;
   font-weight: 500;
   font-size: 15px;
   text-decoration: none;
+}
+
+.navIcon {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.navItem:hover .navIcon,
+.navItemActive .navIcon {
+  opacity: 1;
 }
 
 .navItem:hover {
@@ -172,6 +183,119 @@
   font-size: 0.85rem;
   margin-top: 1rem;
   font-family: monospace;
+  display: block;
+}
+
+.postStrategy {
+  font-size: 0.9rem;
+  color: #ccc;
+  background: rgba(225, 29, 72, 0.05);
+  padding: 12px;
+  border-radius: 8px;
+  border-left: 3px solid var(--primary);
+  margin-bottom: 1.5rem;
+}
+
+.postTabs {
+  display: flex;
+  gap: 4px;
+  background: #050505;
+  padding: 4px;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+}
+
+.tabButton {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #666;
+  padding: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tabActive {
+  background: #222;
+  color: #fff;
+}
+
+.tabContent {
+  background: #050505;
+  border-radius: 12px;
+  padding: 1.5rem;
+  min-height: 200px;
+  border: 1px solid #222;
+}
+
+.hooksList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hookItem {
+  padding: 12px;
+  background: #111;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #eee;
+  border: 1px solid #222;
+}
+
+.hookItem span {
+  color: var(--primary);
+  font-weight: 800;
+  margin-right: 8px;
+}
+
+.captionText, .videoText {
+  white-space: pre-wrap;
+  font-family: inherit;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #eee;
+  margin-bottom: 1.5rem;
+}
+
+.copyButtonSmall {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.platformOption {
+  flex: 1;
+  background: #111;
+  border: 1px solid #222;
+  padding: 12px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #888;
+  transition: all 0.2s;
+}
+
+.platformActive {
+  background: rgba(225, 29, 72, 0.1);
+  border-color: var(--primary);
+  color: #fff;
 }
 
 /* Botões */
