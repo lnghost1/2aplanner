@@ -112,7 +112,7 @@ export default function PlannerPage() {
                   onChange={(e) => setSelectedClient(e.target.value)}
                 >
                   <option value="">Selecione um cliente...</option>
-                  {clients.map(c => (
+                   {clients.map((c: any) => (
                     <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
                 </select>
@@ -176,7 +176,7 @@ export default function PlannerPage() {
 
             {generatedPosts && generatedPosts.length > 0 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                {generatedPosts.map((post, idx) => (
+                {generatedPosts.map((post: any, idx) => (
                   <div key={idx} style={{ padding: '24px', backgroundColor: 'var(--bg-darker)', borderRadius: 'var(--radius-md)', border: '1px solid var(--card-border)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', alignItems: 'center' }}>
                       <span style={{ fontWeight: 700, color: 'var(--primary)', fontSize: '18px' }}>🗓️ {post.date}</span>
