@@ -64,7 +64,7 @@ export default async function ClientsPage() {
                 </tr>
               </thead>
               <tbody>
-                {clients?.map((client) => (
+                {clients?.map((client: any) => (
                   <tr key={client.id}>
                     <td>
                       <div className={styles.clientName}>{client.name}</div>
