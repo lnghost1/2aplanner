@@ -11,11 +11,11 @@ export async function POST(request: Request) {
   try {
     const { clientId, month, postCount, campaignFocus } = await request.json();
 
-    // 1. Fetch Client Briefing from Supabase
     if (!supabase || !ai) {
       return NextResponse.json({ error: 'Sistema não inicializado (Chaves de API ausentes).' }, { status: 500 });
     }
 
+    // 1. Fetch Client Data
     const { data: client, error: clientError } = await supabase
       .from('clients')
       .select('name, industry, briefing')
@@ -26,54 +26,70 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Erro ao buscar dados do cliente.' }, { status: 400 });
     }
 
-    // 2. Build our comprehensive prompt structure
+    // 2. Fetch Knowledge Base (Superpowers)
+    const { data: kb } = await supabase
+      .from('knowledge_base')
+      .select('*')
+      .single();
+
+    // 3. Fetch Client Assets (Context)
+    const { data: assets } = await supabase
+      .from('client_assets')
+      .select('file_name, file_type')
+      .eq('client_id', clientId);
+
+    const assetList = assets?.map(a => `- ${a.file_name} (${a.file_type})`).join('\n') || 'Nenhum arquivo adicional anexado.';
+
+    // 4. Build Multi-modal / Multi-framework Prompt
     const prompt = `
-Você é um Estrategista de Conteúdo sênior de uma agência de marketing (2A Assessoria).
-Sua tarefa é criar um calendário mensal de conteúdo para redes sociais de altíssima conversão.
+Você é um Especialista em Copywriting de Resposta Direta e Estrategista de Conteúdo sênior da 2A Assessoria.
+Sua missão é criar um calendário editorial de elite, focando em gerar desejo imediato e autoridade inquestionável para o cliente.
 
 [DADOS DO CLIENTE]
 Nome: ${client.name}
 Nicho: ${client.industry}
-Briefing completo e regras de marca ditadas pelo cliente:
+Briefing Estratégico:
 ${client.briefing}
+
+[MATERIAIS DE APOIO ANALISADOS]
+O cliente enviou os seguintes arquivos de branding que você deve considerar (estilo visual e tom):
+${assetList}
+
+[DIRETRIZES DA AGÊNCIA 2A (SUPERPODERES)]
+Metodologias de Copy a serem aplicadas: ${kb?.copy_frameworks || 'AIDA, PAS, Storytelling'}
+Regras de Ouro: ${kb?.rules}
+Filtro de Qualidade (O que NÃO fazer): ${kb?.negative_prompt}
 
 [DADOS DO PLANEJAMENTO]
 Mês/Ano Alvo: ${month}
-Quantidade Solicitada de Posts: ${postCount}
-${campaignFocus ? `Foco Adicional da Campanha: ${campaignFocus}` : ''}
+Quantidade: ${postCount} posts
+${campaignFocus ? `Foco da Campanha: ${campaignFocus}` : ''}
 
-[DIRETRIZES TÉCNICAS E DE SAÍDA - CRÍTICO]
-- A escrita DEVE ser cativante, persuasiva e gerar autoridade instantânea.
-- Sem genéricos. Mergulhe fundo nas dores mapeadas no briefing.
-- Você DEVE retornar **UNICAMENTE** um array JSON válido. SEM marcação markdown (\`\`\`json), SEM texto explicativo antes e SEM nada depois. APENAS O ARRAY JSON PURO.
-- O array DEVE conter exatamente ${postCount} objetos com a estrutura exata abaixo:
-
-[
+[ESTRUTURA DE SAÍDA - RIGOROSA]
+- Retorne APENAS um array JSON puro. SEM markdown.
+- Cada objeto deve seguir esta estrutura:
   {
-    "date": "Data e dia sugerido Ex: 12/04 - Terça",
-    "theme": "O raciocínio estratégico / Tema central daquele post",
-    "format": "Formato sugerido (Ex: Reels Dinâmico, Carrossel de Dicas, Post Estático de Autoridade)",
-    "hook": "Uma Headline agressiva ou Hook para prender a atenção (Ex: 'Você perde clientes todos os dias porque...')",
-    "caption": "A legenda em si COMPLETA, pronta para copiar e colar. Use emojis. Aplique gatilhos mentais baseados no briefing. Tamanho entre 1 e 3 parágrafos curtos. Finalize sempre com CTAs claros da marca.",
-    "visual_direction": "Instrução cirúrgica para o designer/editor (Ex: Câmera fechada no rosto, iluminação escurecida, letras em amarelo / Arte com o Dr. segurando um molde e fundo roxo com o título grande)"
+    "date": "Data (dd/mm - Dia)",
+    "theme": "Raciocínio Estratégico (Pq este post hoje?)",
+    "format": "Formato (Ex: Reels de Conexão, Carrossel Educativo)",
+    "hook": "Headline/Gancho de IMPACTO (Superpoder de Copy)",
+    "caption": "Legenda completa com Gatilhos Mentais e CTA forte",
+    "visual_direction": "Instrução para design baseada nos materiais de apoio"
   }
-]
 `;
 
-    // 3. Call Gemini using flash 2.5
+    // 5. Call Gemini
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-1.5-flash', // Optimization: Using 1.5-flash for reliability
       contents: prompt,
       config: {
         maxOutputTokens: 8192,
-        temperature: 0.7,
+        temperature: kb?.temperature || 0.7,
       }
     });
 
     const text = response.text || "[]";
     let cleanedText = text.trim();
-    
-    // Clean JSON decorators if AI includes them despite instructions
     if (cleanedText.startsWith('```json')) cleanedText = cleanedText.slice(7);
     if (cleanedText.startsWith('```')) cleanedText = cleanedText.slice(3);
     if (cleanedText.endsWith('```')) cleanedText = cleanedText.slice(0, -3);
@@ -82,16 +98,16 @@ ${campaignFocus ? `Foco Adicional da Campanha: ${campaignFocus}` : ''}
     try {
       generatedPosts = JSON.parse(cleanedText.trim());
     } catch {
-      console.error("Falha ao organizar o JSON da Inteligência Artificial", text);
-      return NextResponse.json({ error: 'Erro crítico na formatação da saída da IA.' }, { status: 500 });
+      console.error("JSON Parse Error. Data:", text);
+      return NextResponse.json({ error: 'Falha na estruturação estratégica do conteúdo.' }, { status: 500 });
     }
 
-    // 4. Update the Client Status to reflect that the briefing has been used!
+    // 6. Update Client Status
     await supabase.from('clients').update({ status: 'complete' }).eq('id', clientId);
 
     return NextResponse.json(generatedPosts);
   } catch (error: any) {
-    console.error('Error generating with Gemini:', error);
+    console.error('Generation Error:', error);
     return NextResponse.json({ error: error.message || 'Erro Interno do Servidor' }, { status: 500 });
   }
 }
