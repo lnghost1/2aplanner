@@ -185,7 +185,7 @@ export default function PlannerPage() {
                     
                     <h4 style={{ fontSize: '18px', marginBottom: '12px', color: '#fff' }}>🎯 {post.theme}</h4>
                     <p style={{ fontWeight: 600, marginBottom: '16px', color: '#e2e8f0', backgroundColor: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '8px' }}>
-                      🔥 Hook: {"\""}{post.hook}{"\""}
+                      🔥 Hook: &quot;{post.hook}&quot;
                     </p>
                     
                     <div style={{ color: 'var(--text-muted)', fontSize: '15px', lineHeight: '1.6', marginBottom: '20px', whiteSpace: 'pre-wrap' }}>

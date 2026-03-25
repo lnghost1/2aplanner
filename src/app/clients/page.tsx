@@ -88,7 +88,7 @@ export default async function ClientsPage() {
                   <tr>
                     <td colSpan={4} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
                       Você ainda não possui clientes cadastrados.<br/>
-                      Clique em {"\""}Novo Cliente{"\""} para começar!
+                      Clique em &quot;Novo Cliente&quot; para começar!
                     </td>
                   </tr>
                 )}
