@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { getSupabase } from '../../../lib/supabase';
+import { getBunkerContent, getNotionClients } from '../../../lib/notion';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
@@ -31,17 +32,28 @@ const PLATFORM_RULES: Record<string, string> = {
 
 export async function POST(req: Request) {
   try {
-    const { clientId, month, postCount = 4, platform = 'Instagram', campaignFocus } = await req.json();
+    const { clientId, month, postCount = 4, platform = 'Instagram', campaignFocus, bunkerId } = await req.json();
     const supabase = getSupabase();
-    if (!supabase) return NextResponse.json({ error: 'Supabase offline' }, { status: 500 });
+    
+    const notionClients = await getNotionClients();
+    const client = notionClients.find((c: any) => c.id === clientId) || { name: 'Cliente Não Selecionado', industry: 'Diversos' };
+    
+    const { data: kb } = await supabase?.from('knowledge_base').select('*').maybeSingle() || { data: null };
 
-    const { data: client } = await supabase.from('clients').select('*').eq('id', clientId).single();
-    const { data: kb } = await supabase.from('knowledge_base').select('*').maybeSingle();
-    const { data: assets } = await supabase.from('client_assets').select('file_name, file_type').eq('client_id', clientId);
-
-    const assetList = (assets || []).map((item: any) => `- ${item.file_name}`).join('\n') || 'Nenhum arquivo enviado.';
     const platformRules = PLATFORM_RULES[platform] || PLATFORM_RULES['Instagram'];
     const focusSection = campaignFocus ? `\n[FOCO DA CAMPANHA]\n${campaignFocus}\n` : '';
+    
+    let bunkerContext = '';
+    if (bunkerId) {
+      const bContent = await getBunkerContent(bunkerId);
+      bunkerContext = `\n[MÉTODO DO BUNKER DE ROTEIROS]\nOs seguintes roteiros foram extraídos da sua biblioteca de alta performance do Notion. USE-OS COMO INSPIRAÇÃO OBRIGATÓRIA PARA FORMATO E DINÂMICA:\n${bContent}\n`;
+    }
+
+    // EXTRAIR O BRIEFING DO CLIENTE DIRETAMENTE DA PÁGINA DELE NO NOTION
+    let clientBriefing = '';
+    if (clientId) {
+      clientBriefing = await getBunkerContent(clientId);
+    }
 
     const prompt = `
 Você é o mais letal e sofisticado Estrategista de Conteúdo e Copywriter de Resposta Direta do mercado, operando no núcleo criativo da "2A Assessoria" — uma agência de marketing de elite.
@@ -49,13 +61,14 @@ Sua mente funciona combinando psicologia comportamental, neuro-copywriting, rete
 Sua missão inegociável é arquitetar um ecossistema de conteúdo premium para a plataforma [${platform}] que captura a atenção agressivamente em 3 segundos e converte desconhecidos em defensores obstinados da marca.
 
 [ANÁLISE DO CLIENTE: O ALVO DA ESTRATÉGIA]
-- Nome da Marca: ${client?.name || 'Não informado'}
-- Nicho de Mercado: ${client?.industry || 'Não informado'}
-- DNA Estratégico e Briefing: ${client?.briefing || 'Sem briefing específico. Crie conteúdos genéricos porém incisivos, baseados na melhor inteligência de mercado para o nicho.'}
-${focusSection}
-[ARQUIVOS DE REFERÊNCIA (SEUS ATIVOS)]
-${assetList}
+- Nome da Marca: ${client.name}
 
+[BRIEFING ESTRATÉGICO DO NOTION (DOR, TONS E PILARES DO CLIENTE)]
+Aqui estão todas as anotações, referências e dados sobre o cliente extraídos da sua base de dados do Notion:
+${clientBriefing || 'Sem anotações detalhadas.'}
+
+${focusSection}
+${bunkerContext}
 [DIRETRIZES ABSOLUTAS DE NEURO-COPYWRITING DA 2A ASSESSORIA]
 1. ESTRUTURA MAGNÉTICA: Atrito Inicial (choque) -> Consciência do Problema -> Desejo Lógico -> Ação Inevitável (AIDA+).
 2. PAS ENVENENADO (Problema-Agitação-Solução): Apresente o problema, rotacione a faca na ferida (Agitação) provando as consequências invisíveis, e só então traga a especialidade do cliente como alívio heroico.
@@ -98,7 +111,7 @@ Estrutura EXATA e IMUTÁVEL que cada objeto deve seguir:
 ]
 `;
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
     const result = await model.generateContent(prompt);
     const raw = result.response.text();
 
