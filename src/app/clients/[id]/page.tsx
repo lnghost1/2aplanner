@@ -3,6 +3,7 @@ import styles from "../../page.module.css";
 import Link from 'next/link';
 import { ArrowLeft, User, Building, FileText, Image as ImageIcon, Video, File, Trash2, Zap, Calendar, Home, Users, BookOpen } from 'lucide-react';
 import { notFound } from 'next/navigation';
+import DeleteClientBtn from './DeleteClientBtn';
 
 export const revalidate = 0;
 
@@ -63,10 +64,11 @@ export default async function ClientDetail({ params }: { params: { id: string } 
             </Link>
             <h1 className={styles.title}>{client.name}</h1>
           </div>
-          <div style={{ display: 'flex', gap: '12px' }}>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
              <span className={styles.statusBadge} data-status={client.status}>
                 {client.status === 'pending' ? 'Básico' : 'Completo'}
              </span>
+             <DeleteClientBtn clientId={client.id} clientName={client.name} />
           </div>
         </header>
 
