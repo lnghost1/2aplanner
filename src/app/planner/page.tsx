@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { getSupabase } from '../../lib/supabase';
 import styles from '../page.module.css';
 import Link from 'next/link';
-import { Home, Users, BookOpen, Calendar, Wand2, Copy, Check, Globe, Share2, Save, DollarSign } from 'lucide-react';
+import { Home, Users, BookOpen, Calendar, Wand2, Copy, Check, Save, DollarSign, Instagram, Facebook } from 'lucide-react';
 
 export default function PlannerPage() {
   const [clients, setClients] = useState<any[]>([]);
@@ -12,7 +12,9 @@ export default function PlannerPage() {
   const [month, setMonth] = useState('');
   const [postCount, setPostCount] = useState(12);
   const [campaignFocus, setCampaignFocus] = useState('');
-  const [platform, setPlatform] = useState('Instagram');
+  const [platform, setPlatform] = useState('Vídeo');
+  const [bunkerId, setBunkerId] = useState('f3ac434e-adca-8384-9543-81c53dce0a11');
+  
   
   const [generating, setGenerating] = useState(false);
   const [generatedPosts, setGeneratedPosts] = useState<any[] | null>(null);
@@ -21,10 +23,13 @@ export default function PlannerPage() {
 
   useEffect(() => {
     const loadClients = async () => {
-      const supabase = getSupabase();
-      if (!supabase) return;
-      const { data } = await supabase.from('clients').select('id, name');
-      if (data) setClients(data);
+      try {
+        const res = await fetch('/api/notion/clients');
+        const data = await res.json();
+        setClients(data);
+      } catch (err) {
+        console.error("Erro carregando clientes do Notion:", err);
+      }
     };
     loadClients();
   }, []);
@@ -47,7 +52,8 @@ export default function PlannerPage() {
           month,
           postCount,
           campaignFocus,
-          platform
+          platform,
+          bunkerId
         })
       });
       
@@ -124,37 +130,55 @@ export default function PlannerPage() {
         <div className={styles.splitLayout}>
           {/* PAINEL LATERAL DE CONFIGURAÇÃO */}
           <section className={styles.sidebar}>
-            <h3 style={{ marginBottom: '20px', fontSize: '16px', color: '#fff' }}>⚙️ Configuração</h3>
+            <div style={{ marginBottom: '24px' }}>
+              <h3 style={{ fontSize: '18px', color: '#fff', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                ⚙️ Configuração
+              </h3>
+              <p style={{ color: '#888', fontSize: '13px', marginTop: '6px', margin: 0 }}>Parâmetros para a estratégia do conteúdo.</p>
+            </div>
             
             <div className={styles.formGroup}>
-              <label>Rede Social</label>
-              <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+              <label>Formato</label>
+              <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
                 <div 
-                  className={`${styles.platformOption} ${platform === 'Instagram' ? styles.platformActive : ''}`}
-                  onClick={() => setPlatform('Instagram')}
+                  className={`${styles.platformOption} ${platform === 'Vídeo' ? styles.platformActive : ''}`}
+                  onClick={() => setPlatform('Vídeo')}
                 >
-                  <Globe size={16} /> Instagram / Reels
+                  <Instagram size={18} /> Vídeo (Reels/TikTok)
                 </div>
                 <div 
-                  className={`${styles.platformOption} ${platform === 'Facebook' ? styles.platformActive : ''}`}
-                  onClick={() => setPlatform('Facebook')}
+                  className={`${styles.platformOption} ${platform === 'Post' ? styles.platformActive : ''}`}
+                  onClick={() => setPlatform('Post')}
                 >
-                  <Share2 size={16} /> Facebook
+                  <Facebook size={18} /> Post (Estático/Carrossel)
                 </div>
               </div>
             </div>
 
             <div className={styles.formGroup}>
-              <label>Cliente</label>
+              <label>Cliente (Lista Oficial Notion)</label>
               <select className={styles.inputField} value={selectedClient} onChange={e => setSelectedClient(e.target.value)}>
-                <option value="">Selecione...</option>
+                <option value="">Selecione na sua Assessoria...</option>
                 {clients.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </div>
 
             <div className={styles.formGroup}>
+              <label>Bunker de Estilo (Notion)</label>
+              <select className={styles.inputField} value={bunkerId} onChange={e => setBunkerId(e.target.value)}>
+                <option value="">Sem Bunker (Genérico)</option>
+                <option value="f3ac434e-adca-8384-9543-81c53dce0a11">Bunker 1</option>
+                <option value="d1ec434e-adca-820a-9770-01718bb787f8">Bunker 2</option>
+                <option value="789c434e-adca-82bc-abca-812ed71be221">Bunker 3</option>
+                <option value="94ac434e-adca-821d-8b80-0112adbaf8db">Bunker 4</option>
+                <option value="6efc434e-adca-8284-970b-8100ea8e109e">Bunker 5</option>
+                <option value="5b5c434e-adca-82ac-819c-017112308b80">Bunker 6</option>
+              </select>
+            </div>
+
+            <div className={styles.formGroup}>
               <label>Mês / Ano</label>
-              <input type="month" className={styles.inputField} value={month} onChange={e => setMonth(e.target.value)} />
+              <input type="text" placeholder="Ex: Abril de 2026" className={styles.inputField} value={month} onChange={e => setMonth(e.target.value)} />
             </div>
 
             <div className={styles.formGroup}>
