@@ -10,9 +10,9 @@ export default function PlannerPage() {
   const [clients, setClients] = useState<any[]>([]);
   const [selectedClient, setSelectedClient] = useState('');
   const [month, setMonth] = useState('');
-  const [postCount, setPostCount] = useState(12);
+  const [videoCount, setVideoCount] = useState(8);
+  const [postCount, setPostCount] = useState(4);
   const [campaignFocus, setCampaignFocus] = useState('');
-  const [platform, setPlatform] = useState('Vídeo');
   const [bunkerId, setBunkerId] = useState('f3ac434e-adca-8384-9543-81c53dce0a11');
   
   
@@ -50,9 +50,9 @@ export default function PlannerPage() {
         body: JSON.stringify({
           clientId: selectedClient,
           month,
+          videoCount,
           postCount,
           campaignFocus,
-          platform,
           bunkerId
         })
       });
@@ -84,7 +84,8 @@ export default function PlannerPage() {
 
     const { error } = await supabase.from('content_plans').insert([{
       client_id: selectedClient,
-      platform,
+      video_count: videoCount,
+      post_count: postCount,
       month,
       posts: generatedPosts,
       status: 'saved'
@@ -137,21 +138,14 @@ export default function PlannerPage() {
               <p style={{ color: '#888', fontSize: '13px', marginTop: '6px', margin: 0 }}>Parâmetros para a estratégia do conteúdo.</p>
             </div>
             
-            <div className={styles.formGroup}>
-              <label>Formato</label>
-              <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-                <div 
-                  className={`${styles.platformOption} ${platform === 'Vídeo' ? styles.platformActive : ''}`}
-                  onClick={() => setPlatform('Vídeo')}
-                >
-                  <Instagram size={18} /> Vídeo (Reels/TikTok)
-                </div>
-                <div 
-                  className={`${styles.platformOption} ${platform === 'Post' ? styles.platformActive : ''}`}
-                  onClick={() => setPlatform('Post')}
-                >
-                  <Facebook size={18} /> Post (Estático/Carrossel)
-                </div>
+            <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
+              <div className={styles.formGroup} style={{ marginBottom: 0, flex: 1 }}>
+                <label>Qtd. Vídeos (Reels)</label>
+                <input type="number" min="0" max="30" value={videoCount} onChange={e => setVideoCount(Number(e.target.value))} className={styles.inputField} />
+              </div>
+              <div className={styles.formGroup} style={{ marginBottom: 0, flex: 1 }}>
+                <label>Qtd. Posts (Estáticos)</label>
+                <input type="number" min="0" max="30" value={postCount} onChange={e => setPostCount(Number(e.target.value))} className={styles.inputField} />
               </div>
             </div>
 
@@ -181,10 +175,7 @@ export default function PlannerPage() {
               <input type="text" placeholder="Ex: Abril de 2026" className={styles.inputField} value={month} onChange={e => setMonth(e.target.value)} />
             </div>
 
-            <div className={styles.formGroup}>
-              <label>Posts por Mês</label>
-              <input type="number" min="1" max="30" value={postCount} onChange={e => setPostCount(Number(e.target.value))} className={styles.inputField} />
-            </div>
+
 
             <div className={styles.formGroup}>
               <label>Foco da Campanha</label>

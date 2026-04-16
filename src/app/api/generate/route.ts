@@ -32,7 +32,7 @@ const PLATFORM_RULES: Record<string, string> = {
 
 export async function POST(req: Request) {
   try {
-    const { clientId, month, postCount = 4, platform = 'Instagram', campaignFocus, bunkerId } = await req.json();
+    const { clientId, month, videoCount = 8, postCount = 4, campaignFocus, bunkerId } = await req.json();
     const supabase = getSupabase();
     
     const notionClients = await getNotionClients();
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     
     const { data: kb } = await supabase?.from('knowledge_base').select('*').maybeSingle() || { data: null };
 
-    const platformRules = PLATFORM_RULES[platform] || PLATFORM_RULES['Instagram'];
+    const totalCount = videoCount + postCount;
     const focusSection = campaignFocus ? `\n[FOCO DA CAMPANHA]\n${campaignFocus}\n` : '';
     
     let bunkerContext = '';
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
     const prompt = `
 Você é o mais letal e sofisticado Estrategista de Conteúdo e Copywriter de Resposta Direta do mercado, operando no núcleo criativo da "2A Assessoria" — uma agência de marketing de elite.
 Sua mente funciona combinando psicologia comportamental, neuro-copywriting, retenção de atenção e análise profunda de algoritmos.
-Sua missão inegociável é arquitetar um ecossistema de conteúdo premium para a plataforma [${platform}] que captura a atenção agressivamente em 3 segundos e converte desconhecidos em defensores obstinados da marca.
+Sua missão inegociável é arquitetar um ecossistema de conteúdo premium multiplataforma que captura a atenção agressivamente em 3 segundos e converte desconhecidos em defensores obstinados da marca.
 
 [ANÁLISE DO CLIENTE: O ALVO DA ESTRATÉGIA]
 - Nome da Marca: ${client.name}
@@ -78,11 +78,16 @@ ${bunkerContext}
 6. Personalidade e Tom Customizáveis: ${kb?.rules || 'Foco extremo em conversão. Inteligência acima da média.'}
 7. Filtros e Restrições Finais: ${kb?.negative_prompt || 'Nenhuma restrição adicional, confie nos seus instintos predadores.'}
 
-[REGRAS DA ARENA DE ATENÇÃO: ${platform.toUpperCase()}]
-${platformRules}
+[REGRAS DA ARENA DE ATENÇÃO: HÍBRIDA]
+Para Roteiros de VÍDEO (Reels/TikTok): Apele para hook visual em 3s, dinâmicas aceleradas (15-45s) e retenção nativa.
+Para Roteiros de POSTS ESTÁTICOS (Instagram Carousel/Facebook): Apele para tempo de tela através da leitura, copy estruturada em blocos respiráveis B2H (Pessoa pra Pessoa) e forte peso emocional (Storytelling).
 
-[ARQUITETURA DO CALENDÁRIO: GERAR ${postCount} POSTS]
-Sua entrega deve contar uma narrativa distribuída. Cobre estes arcos argumentativos entre os ${postCount} posts: 
+[ARQUITETURA DO CALENDÁRIO: GERAR EXACTAMENTE UM ARRAY COM ${totalCount} OBJETOS]
+Você deve gerar EXATAMENTE ${totalCount} peças de conteúdo NESTE JSON, sendo OBRIGATORIAMENTE:
+- ${videoCount} peças no formato "Vídeo Curto (Reels/TikTok)"
+- ${postCount} peças no formato "Post Estático/Carrossel"
+
+Sua entrega combinada deve contar uma narrativa distribuída entre essa contagem de Vídeos e Posts. Cobre estes arcos argumentativos: 
 - Conscientização de Dor Indesejada (Topo de Funil).
 - Quebra de Mitos e Credibilidade (Meio de Funil).
 - Agitação Subconsciente e Oferta/Solução Racional (Fundo de Funil).
