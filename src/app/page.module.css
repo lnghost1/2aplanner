@@ -121,6 +121,23 @@
   margin-bottom: 24px;
 }
 
+.statCard {
+  background: var(--card-highlight);
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: var(--ambient-shadow);
+  transition: var(--transition-normal);
+}
+
+.statCard:hover {
+  transform: translateY(-2px);
+  background: #303030;
+}
+
 .postCard {
   background: #111;
   border: 1px solid #222;
@@ -277,45 +294,54 @@
 
 .platformOption {
   flex: 1;
-  background: #111;
-  border: 1px solid #222;
-  padding: 12px;
-  border-radius: 10px;
+  background: #0a0a0a;
+  border: 1px solid #2a2a2a;
+  padding: 14px 12px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: #888;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+}
+
+.platformOption:hover {
+  background: #111;
+  border-color: #444;
+  color: #ddd;
 }
 
 .platformActive {
-  background: rgba(225, 29, 72, 0.1);
+  background: rgba(225, 29, 72, 0.08);
   border-color: var(--primary);
-  color: #fff;
+  color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary);
 }
 
 /* Botões */
 .btnPrimary {
-  background-color: var(--primary);
+  background: var(--primary-gradient);
   color: #fff;
   border: none;
-  padding: 12px 24px;
-  border-radius: 10px;
-  cursor: pointer;
+  border-radius: var(--radius-md);
+  padding: 12px 20px;
+  font-size: 0.9rem;
   font-weight: 700;
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.2s;
+  cursor: pointer;
+  transition: var(--transition-normal);
+  box-shadow: 0 4px 15px rgba(225, 29, 72, 0.2);
 }
 
 .btnPrimary:hover {
-  background-color: var(--primary-hover);
-  transform: scale(1.02);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(225, 29, 72, 0.4);
 }
 
 .btnSecondary {
@@ -365,18 +391,20 @@
 
 .inputField, .textareaField {
   width: 100%;
-  background-color: #0a0a0a;
-  border: 1px solid #333;
-  border-radius: 10px;
-  color: #fff;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--ghost-border);
+  border-radius: var(--radius-md);
+  color: var(--text-color);
   padding: 12px 16px;
-  font-size: 15px;
-  transition: border-color 0.2s;
+  font-size: 0.95rem;
+  outline: none;
+  transition: var(--transition-fast);
+  font-family: inherit;
 }
 
 .inputField:focus, .textareaField:focus {
   border-color: var(--primary);
-  outline: none;
+  background: transparent;
 }
 
 /* Status e Badges */
@@ -429,3 +457,98 @@
   50% { opacity: 0.5; transform: scale(1.05); }
   100% { opacity: 1; transform: scale(1); }
 }
+
+/* Busca (Search) */
+.searchBar {
+  display: flex;
+  align-items: center;
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.searchInput {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-color);
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.searchInput::placeholder {
+  color: var(--text-muted);
+}
+
+/* Tabelas e Clientes */
+.tableContainer {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table th {
+  padding: 16px 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--card-border);
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.table td {
+  padding: 20px;
+  border-bottom: 1px solid var(--card-border);
+  vertical-align: middle;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.clientName {
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 4px;
+  font-size: 1rem;
+}
+
+.clientIndustry {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.actionBtn {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--primary);
+  text-decoration: none;
+  padding: 8px 12px;
+  background-color: rgba(225, 29, 72, 0.1);
+  border-radius: 6px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.actionBtn:hover {
+  background-color: rgba(225, 29, 72, 0.2);
+}
+
