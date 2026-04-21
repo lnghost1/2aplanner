@@ -36,7 +36,6 @@ export default function FinancePage() {
         <nav className={styles.nav}>
           <Link href="/" className={styles.navItem}><Home size={20} /> Visão Geral</Link>
           <Link href="/clients" className={styles.navItem}><Users size={20} /> Clientes</Link>
-          <Link href="/knowledge" className={styles.navItem}><BookOpen size={20} /> Base da IA</Link>
           <Link href="/planner" className={styles.navItem}><Wand2 size={20} /> Planejador</Link>
           <Link href="/calendar" className={styles.navItem}><Calendar size={20} /> Calendário</Link>
           <Link href="/finance" className={`${styles.navItem} ${styles.navItemActive}`}><DollarSign size={20} /> Financeiro</Link>

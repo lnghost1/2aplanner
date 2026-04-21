@@ -49,17 +49,33 @@ export default function CalendarPage() {
 
   useEffect(() => {
     const load = async () => {
-      const supabase = getSupabase();
-      if (!supabase) return;
       setLoading(true);
+      const supabase = getSupabase();
+      
+      try {
+        // Busca clientes oficiais da sua base do Notion
+        const notionRes = await fetch('/api/notion/clients');
+        const notionClients = await notionRes.json();
+        
+        // Busca o histórico de planejamentos salvos
+        let plansData: any[] = [];
+        if (supabase) {
+          const { data } = await supabase.from('content_plans').select('*').order('created_at', { ascending: false });
+          plansData = data || [];
+        }
 
-      const [{ data: plansData }, { data: clientsData }] = await Promise.all([
-        supabase.from('content_plans').select('*, clients(name)').order('created_at', { ascending: false }),
-        supabase.from('clients').select('id, name'),
-      ]);
+        // Injeta o nome do cliente do Notion no plano gerado
+        const mappedPlans = plansData.map(plan => {
+          const c = notionClients.find((cli: any) => cli.id === plan.client_id);
+          return { ...plan, clients: { name: c ? c.name : 'Cliente Arquivado/Removido' } };
+        });
 
-      setPlans(plansData || []);
-      setClients(clientsData || []);
+        setClients(notionClients || []);
+        setPlans(mappedPlans);
+      } catch (e) { 
+        console.error("Erro ao sincronizar Calendário com Notion/Supabase:", e); 
+      }
+      
       setLoading(false);
     };
     load();
@@ -123,7 +139,6 @@ export default function CalendarPage() {
         <nav className={styles.nav}>
           <Link href="/" className={styles.navItem}><Home size={20} /> Visão Geral</Link>
           <Link href="/clients" className={styles.navItem}><Users size={20} /> Clientes</Link>
-          <Link href="/knowledge" className={styles.navItem}><BookOpen size={20} /> Base da IA</Link>
           <Link href="/planner" className={styles.navItem}><Wand2 size={20} /> Planejador</Link>
           <Link href="/calendar" className={`${styles.navItem} ${styles.navItemActive}`}><Calendar size={20} /> Calendário</Link>
           <Link href="/finance" className={styles.navItem}><DollarSign size={20} /> Financeiro</Link>
