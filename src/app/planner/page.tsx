@@ -13,7 +13,6 @@ export default function PlannerPage() {
   const [videoCount, setVideoCount] = useState(8);
   const [postCount, setPostCount] = useState(4);
   const [campaignFocus, setCampaignFocus] = useState('');
-  const [bunkerId, setBunkerId] = useState('f3ac434e-adca-8384-9543-81c53dce0a11');
   
   
   const [generating, setGenerating] = useState(false);
@@ -52,8 +51,7 @@ export default function PlannerPage() {
           month,
           videoCount,
           postCount,
-          campaignFocus,
-          bunkerId
+          campaignFocus
         })
       });
       
@@ -158,24 +156,9 @@ export default function PlannerPage() {
             </div>
 
             <div className={styles.formGroup}>
-              <label>Bunker de Estilo (Notion)</label>
-              <select className={styles.inputField} value={bunkerId} onChange={e => setBunkerId(e.target.value)}>
-                <option value="">Sem Bunker (Genérico)</option>
-                <option value="f3ac434e-adca-8384-9543-81c53dce0a11">Bunker 1</option>
-                <option value="d1ec434e-adca-820a-9770-01718bb787f8">Bunker 2</option>
-                <option value="789c434e-adca-82bc-abca-812ed71be221">Bunker 3</option>
-                <option value="94ac434e-adca-821d-8b80-0112adbaf8db">Bunker 4</option>
-                <option value="6efc434e-adca-8284-970b-8100ea8e109e">Bunker 5</option>
-                <option value="5b5c434e-adca-82ac-819c-017112308b80">Bunker 6</option>
-              </select>
-            </div>
-
-            <div className={styles.formGroup}>
               <label>Mês / Ano</label>
               <input type="text" placeholder="Ex: Abril de 2026" className={styles.inputField} value={month} onChange={e => setMonth(e.target.value)} />
             </div>
-
-
 
             <div className={styles.formGroup}>
               <label>Foco da Campanha</label>
