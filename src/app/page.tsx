@@ -55,9 +55,6 @@ export default async function Dashboard() {
             <Link href="/clients" className={styles.navItem}>
               <Users size={20} className={styles.navIcon} /> Clientes
             </Link>
-            <Link href="/knowledge" className={styles.navItem}>
-              <BookOpen size={20} className={styles.navIcon} /> Base da IA
-            </Link>
             <Link href="/planner" className={styles.navItem}>
               <Wand2 size={20} className={styles.navIcon} /> Planejador
             </Link>

@@ -32,9 +32,6 @@ export default async function ClientsPage() {
           <Link href="/clients" className={`${styles.navItem} ${styles.navItemActive}`}>
             <Users size={20} className={styles.navIcon} /> Clientes
           </Link>
-          <Link href="/knowledge" className={styles.navItem}>
-            <BookOpen size={20} className={styles.navIcon} /> Base da IA
-          </Link>
           <Link href="/planner" className={styles.navItem}>
             <Wand2 size={20} className={styles.navIcon} /> Planejador
           </Link>
