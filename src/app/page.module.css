@@ -626,62 +626,13 @@
   color: var(--accent-red);
 }
 
+
 /* =========================================
    RESPONSIVIDADE (MOBILE & TABLET)
    ========================================= */
 
+/* --- TABLET (900px) --- */
 @media (max-width: 900px) {
-  .container {
-    flex-direction: column;
-  }
-
-  .sidebar_nav {
-    width: 100%;
-    height: auto;
-    position: relative;
-    padding: 16px 20px;
-    border-right: none;
-    border-bottom: 1px solid var(--card-border);
-  }
-
-  .logo {
-    margin-bottom: 20px;
-  }
-
-  .nav {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  .navItem {
-    padding: 10px 14px;
-    font-size: 14px;
-    flex: 1 1 auto;
-    justify-content: center;
-  }
-
-  .main {
-    padding: 24px 20px;
-  }
-
-  .header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-  }
-
-  .header div {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .header button {
-    width: 100%;
-    justify-content: center;
-  }
-
   .splitLayout {
     flex-direction: column;
     gap: 2rem;
@@ -695,6 +646,10 @@
     padding: 1.5rem;
   }
 
+  .cardGrid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
   .postTabs {
     flex-wrap: wrap;
   }
@@ -706,12 +661,220 @@
   }
 }
 
-@media (max-width: 480px) {
-  .navItem {
-    flex: 1 1 100%;
+/* --- MOBILE (640px e abaixo) --- */
+@media (max-width: 640px) {
+
+  /* Esconde a sidebar lateral completamente */
+  .sidebar_nav {
+    display: none !important;
   }
-  
+
+  /* Adiciona padding inferior para não ficar atrás da nav */
+  .container {
+    display: block;
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+
+  /* Conteúdo principal ocupa tela toda sem sidebar */
+  .main {
+    padding: 20px 16px;
+    max-width: 100%;
+    margin: 0;
+  }
+
+  /* Header empilhado */
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .header > div {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
   .title {
-    font-size: 26px;
+    font-size: 24px;
+  }
+
+  /* Cards em coluna única */
+  .cardGrid {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+  }
+
+  .card {
+    padding: 20px;
+  }
+
+  /* Split layout do planejador em coluna */
+  .splitLayout {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .sidebar {
+    flex: none;
+    width: 100%;
+    position: relative;
+    top: 0;
+    padding: 1.25rem;
+    box-sizing: border-box;
+  }
+
+  /* Botões full-width e touch-friendly (44px min) */
+  .btnPrimary,
+  .btnSecondary {
+    width: 100%;
+    justify-content: center;
+    min-height: 44px;
+    font-size: 15px;
+  }
+
+  /* Input e textarea maiores para toque */
+  .inputField,
+  .textareaField {
+    font-size: 16px; /* Evita zoom automático no iOS */
+    padding: 12px 14px;
+    min-height: 44px;
+  }
+
+  /* Cards de post full-width */
+  .postCard {
+    border-radius: 12px;
+    margin-bottom: 1.25rem;
+  }
+
+  .postHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  /* Abas dos posts em grid 2 colunas */
+  .postTabs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  .tabButton {
+    justify-content: center;
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+
+  /* Botões de ação compactos */
+  .actionBtn {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+
+  /* Busca full-width */
+  .searchBar {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .searchInput {
+    width: 100%;
+  }
+
+  /* Itens de cliente em coluna */
+  .clientItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 16px;
+  }
+
+  /* Tabela financeira: esconde colunas extras em telas pequenas */
+  .financeTable th:nth-child(2),
+  .financeTable td:nth-child(2),
+  .financeTable th:nth-child(3),
+  .financeTable td:nth-child(3) {
+    display: none;
+  }
+}
+
+/* =========================================
+   BOTTOM NAVIGATION (MOBILE APP-STYLE)
+   ========================================= */
+
+/* Elemento da bottom nav — adicionado via JS/globals.css */
+.mobileBottomNav {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .mobileBottomNav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: #0a0a0a;
+    border-top: 1px solid #222;
+    padding: 0;
+    height: 64px;
+    align-items: stretch;
+    justify-content: space-around;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+  }
+
+  .mobileNavItem {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: #666;
+    font-size: 10px;
+    font-weight: 600;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    transition: color 0.2s ease;
+    padding: 8px 4px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+  }
+
+  .mobileNavItem:hover,
+  .mobileNavItemActive {
+    color: var(--primary);
+  }
+
+  .mobileNavItem svg {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+  }
+}
+
+/* Extra small (iPhone SE etc) */
+@media (max-width: 375px) {
+  .main {
+    padding: 16px 12px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .mobileNavItem span {
+    display: none; /* Esconde labels nas telas menores, deixa só ícones */
   }
 }

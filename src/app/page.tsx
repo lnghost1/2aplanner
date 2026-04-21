@@ -102,6 +102,15 @@ export default async function Dashboard() {
             </div>
           </section>
         </main>
+
+        {/* Mobile Bottom Navigation */}
+        <nav className={styles.mobileBottomNav}>
+          <Link href="/" className={`${styles.mobileNavItem} ${styles.mobileNavItemActive}`}><Home size={22} /><span>Início</span></Link>
+          <Link href="/clients" className={styles.mobileNavItem}><Users size={22} /><span>Clientes</span></Link>
+          <Link href="/planner" className={styles.mobileNavItem}><Wand2 size={22} /><span>Planner</span></Link>
+          <Link href="/calendar" className={styles.mobileNavItem}><Calendar size={22} /><span>Agenda</span></Link>
+          <Link href="/finance" className={styles.mobileNavItem}><DollarSign size={22} /><span>Financeiro</span></Link>
+        </nav>
       </div>
     );
   } catch (error: any) {
