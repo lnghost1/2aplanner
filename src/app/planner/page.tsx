@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { getSupabase } from '../../lib/supabase';
 import styles from '../page.module.css';
 import Link from 'next/link';
-import { Home, Users, BookOpen, Calendar, Wand2, Copy, Check, Save, DollarSign, Instagram, Facebook } from 'lucide-react';
+import { Home, Users, BookOpen, Calendar, Wand2, Copy, Check, Save, DollarSign, Instagram, Facebook, Sparkles } from 'lucide-react';
 
 export default function PlannerPage() {
   const [clients, setClients] = useState<any[]>([]);
@@ -100,6 +100,7 @@ export default function PlannerPage() {
         <nav className={styles.nav}>
           <Link href="/" className={styles.navItem}><Home size={20} /> Visão Geral</Link>
           <Link href="/clients" className={styles.navItem}><Users size={20} /> Clientes</Link>
+          <Link href="/knowledge" className={styles.navItem}><Sparkles size={20} /> Treinar IA</Link>
           <Link href="/planner" className={`${styles.navItem} ${styles.navItemActive}`}><Wand2 size={20} /> Planejador</Link>
           <Link href="/calendar" className={styles.navItem}><Calendar size={20} /> Calendário</Link>
           <Link href="/finance" className={styles.navItem}><DollarSign size={20} /> Financeiro</Link>
@@ -272,9 +273,9 @@ export default function PlannerPage() {
       <nav className={styles.mobileBottomNav}>
         <Link href="/" className={styles.mobileNavItem}><Home size={22} /><span>Início</span></Link>
         <Link href="/clients" className={styles.mobileNavItem}><Users size={22} /><span>Clientes</span></Link>
+        <Link href="/knowledge" className={styles.mobileNavItem}><Sparkles size={22} /><span>IA</span></Link>
         <Link href="/planner" className={`${styles.mobileNavItem} ${styles.mobileNavItemActive}`}><Wand2 size={22} /><span>Planner</span></Link>
         <Link href="/calendar" className={styles.mobileNavItem}><Calendar size={22} /><span>Agenda</span></Link>
-        <Link href="/finance" className={styles.mobileNavItem}><DollarSign size={22} /><span>Financeiro</span></Link>
       </nav>
     </div>
   );

@@ -1,7 +1,7 @@
 import { getSupabase } from '../../lib/supabase';
 import styles from '../page.module.css';
 import Link from 'next/link';
-import { Home, Users, BookOpen, Calendar, Search, Plus, Wand2, DollarSign } from 'lucide-react';
+import { Home, Users, BookOpen, Calendar, Search, Plus, Wand2, DollarSign, Sparkles } from 'lucide-react';
 
 export const revalidate = 0; // Disable cache to always show newest clients
 
@@ -31,6 +31,9 @@ export default async function ClientsPage() {
           </Link>
           <Link href="/clients" className={`${styles.navItem} ${styles.navItemActive}`}>
             <Users size={20} className={styles.navIcon} /> Clientes
+          </Link>
+          <Link href="/knowledge" className={styles.navItem}>
+            <Sparkles size={20} className={styles.navIcon} /> Treinar IA
           </Link>
           <Link href="/planner" className={styles.navItem}>
             <Wand2 size={20} className={styles.navIcon} /> Planejador
@@ -108,9 +111,9 @@ export default async function ClientsPage() {
       <nav className={styles.mobileBottomNav}>
         <Link href="/" className={styles.mobileNavItem}><Home size={22} /><span>Início</span></Link>
         <Link href="/clients" className={`${styles.mobileNavItem} ${styles.mobileNavItemActive}`}><Users size={22} /><span>Clientes</span></Link>
+        <Link href="/knowledge" className={styles.mobileNavItem}><Sparkles size={22} /><span>IA</span></Link>
         <Link href="/planner" className={styles.mobileNavItem}><Wand2 size={22} /><span>Planner</span></Link>
         <Link href="/calendar" className={styles.mobileNavItem}><Calendar size={22} /><span>Agenda</span></Link>
-        <Link href="/finance" className={styles.mobileNavItem}><DollarSign size={22} /><span>Financeiro</span></Link>
       </nav>
     </div>
   );

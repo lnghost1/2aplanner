@@ -5,7 +5,7 @@ import { getSupabase } from '../../lib/supabase';
 import styles from '../page.module.css';
 import calStyles from './calendar.module.css';
 import Link from 'next/link';
-import { Home, Users, BookOpen, Calendar, ChevronLeft, ChevronRight, X, Instagram, Facebook, Wand2, DollarSign } from 'lucide-react';
+import { Home, Users, BookOpen, Calendar, ChevronLeft, ChevronRight, X, Instagram, Facebook, Wand2, DollarSign, Sparkles } from 'lucide-react';
 
 const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 const MONTHS_PT = [
@@ -139,6 +139,7 @@ export default function CalendarPage() {
         <nav className={styles.nav}>
           <Link href="/" className={styles.navItem}><Home size={20} /> Visão Geral</Link>
           <Link href="/clients" className={styles.navItem}><Users size={20} /> Clientes</Link>
+          <Link href="/knowledge" className={styles.navItem}><Sparkles size={20} /> Treinar IA</Link>
           <Link href="/planner" className={styles.navItem}><Wand2 size={20} /> Planejador</Link>
           <Link href="/calendar" className={`${styles.navItem} ${styles.navItemActive}`}><Calendar size={20} /> Calendário</Link>
           <Link href="/finance" className={styles.navItem}><DollarSign size={20} /> Financeiro</Link>
@@ -304,9 +305,9 @@ export default function CalendarPage() {
       <nav className={styles.mobileBottomNav}>
         <Link href="/" className={styles.mobileNavItem}><Home size={22} /><span>Início</span></Link>
         <Link href="/clients" className={styles.mobileNavItem}><Users size={22} /><span>Clientes</span></Link>
+        <Link href="/knowledge" className={styles.mobileNavItem}><Sparkles size={22} /><span>IA</span></Link>
         <Link href="/planner" className={styles.mobileNavItem}><Wand2 size={22} /><span>Planner</span></Link>
         <Link href="/calendar" className={`${styles.mobileNavItem} ${styles.mobileNavItemActive}`}><Calendar size={22} /><span>Agenda</span></Link>
-        <Link href="/finance" className={styles.mobileNavItem}><DollarSign size={22} /><span>Financeiro</span></Link>
       </nav>
     </div>
   );

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import styles from '../page.module.css';
 import Link from 'next/link';
-import { Home, Users, BookOpen, Calendar, Wand2, DollarSign, ArrowUpRight, ArrowDownRight, TrendingUp, Plus, Filter, Wallet } from 'lucide-react';
+import { Home, Users, BookOpen, Calendar, Wand2, DollarSign, ArrowUpRight, ArrowDownRight, TrendingUp, Plus, Filter, Wallet, Sparkles } from 'lucide-react';
 
 const MOCK_FINANCES = [
   { id: 1, type: 'income', desc: 'Fee Mensal - Cliente X', category: 'Recorrente', amount: 3500.00, date: '2026-03-01', status: 'paid' },
@@ -36,6 +36,7 @@ export default function FinancePage() {
         <nav className={styles.nav}>
           <Link href="/" className={styles.navItem}><Home size={20} /> Visão Geral</Link>
           <Link href="/clients" className={styles.navItem}><Users size={20} /> Clientes</Link>
+          <Link href="/knowledge" className={styles.navItem}><Sparkles size={20} /> Treinar IA</Link>
           <Link href="/planner" className={styles.navItem}><Wand2 size={20} /> Planejador</Link>
           <Link href="/calendar" className={styles.navItem}><Calendar size={20} /> Calendário</Link>
           <Link href="/finance" className={`${styles.navItem} ${styles.navItemActive}`}><DollarSign size={20} /> Financeiro</Link>
@@ -177,9 +178,9 @@ export default function FinancePage() {
       <nav className={styles.mobileBottomNav}>
         <Link href="/" className={styles.mobileNavItem}><Home size={22} /><span>Início</span></Link>
         <Link href="/clients" className={styles.mobileNavItem}><Users size={22} /><span>Clientes</span></Link>
+        <Link href="/knowledge" className={styles.mobileNavItem}><Sparkles size={22} /><span>IA</span></Link>
         <Link href="/planner" className={styles.mobileNavItem}><Wand2 size={22} /><span>Planner</span></Link>
         <Link href="/calendar" className={styles.mobileNavItem}><Calendar size={22} /><span>Agenda</span></Link>
-        <Link href="/finance" className={`${styles.mobileNavItem} ${styles.mobileNavItemActive}`}><DollarSign size={22} /><span>Financeiro</span></Link>
       </nav>
     </div>
   );
