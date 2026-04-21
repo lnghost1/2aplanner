@@ -8,7 +8,7 @@ export const notion = new Client({
 
 // IDs mapeados do Notion
 export const NOTION_DBS = {
-  CLIENTES: '305c434e-adca-81ff-8d59-dffccbfc8fd6',
+  CLIENTES: '305c434e-adca-81a8-b255-fa6a9fbc3727', // ID real da URL do Notion
   // Bunkers (paginas base)
   BUNKER_1: 'f3ac434e-adca-8384-9543-81c53dce0a11',
   BUNKER_2: 'd1ec434e-adca-820a-9770-01718bb787f8',
@@ -19,42 +19,58 @@ export const NOTION_DBS = {
 };
 
 /**
- * Busca clientes do banco de dados principal de CLIENTES no Notion
+ * Busca TODOS os clientes do banco de dados principal de CLIENTES no Notion
+ * Com suporte a paginação para garantir que todos sejam retornados
  */
 export async function getNotionClients() {
   if (!notionApiKey) return [];
   try {
-    const response = await fetch(`https://api.notion.com/v1/databases/${NOTION_DBS.CLIENTES}/query`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${notionApiKey}`,
-        'Notion-Version': '2022-06-28',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({})
-    });
-    
-    if (!response.ok) {
-      console.error('Notion API error', response.statusText);
-      return [];
-    }
-    
-    const data = await response.json();
-    
-    return data.results.map((page: any) => {
-      // O nome do cliente quase sempre fica na propriedade root "Name" ou "Cliente"
-      const props = page.properties;
-      const nameKey = Object.keys(props).find(k => props[k].type === 'title');
-      const nome = nameKey && props[nameKey].title[0] 
-                   ? props[nameKey].title[0].plain_text 
-                   : 'Cliente Sem Nome';
+    const allClients: any[] = [];
+    let cursor: string | undefined = undefined;
+    let hasMore = true;
+
+    // Loop de paginação — busca até não ter mais resultados
+    while (hasMore) {
+      const body: any = { page_size: 100 };
+      if (cursor) body.start_cursor = cursor;
+
+      const response = await fetch(`https://api.notion.com/v1/databases/${NOTION_DBS.CLIENTES}/query`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${notionApiKey}`,
+          'Notion-Version': '2022-06-28',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
       
-      return {
-        id: page.id,
-        name: nome,
-        notionUrl: page.url
-      };
-    });
+      if (!response.ok) {
+        console.error('Notion API error', response.status, response.statusText);
+        break;
+      }
+      
+      const data = await response.json();
+      
+      // Extrai nome de cada página/cliente
+      for (const page of data.results) {
+        const props = page.properties;
+        const nameKey = Object.keys(props).find(k => props[k].type === 'title');
+        const nome = nameKey && props[nameKey].title[0] 
+                     ? props[nameKey].title[0].plain_text 
+                     : 'Cliente Sem Nome';
+        
+        allClients.push({
+          id: page.id,
+          name: nome,
+          notionUrl: page.url
+        });
+      }
+
+      hasMore = data.has_more;
+      cursor = data.next_cursor;
+    }
+
+    return allClients;
   } catch (error) {
     console.error("Erro ao buscar clientes no Notion:", error);
     return [];
