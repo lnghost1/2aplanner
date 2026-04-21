@@ -1,10 +1,21 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { getSupabase } from '../../lib/supabase';
 import styles from '../page.module.css';
 import Link from 'next/link';
-import { Home, Users, BookOpen, Calendar, Wand2, Copy, Check, Save, DollarSign, Instagram, Facebook, Sparkles } from 'lucide-react';
+import { Home, Users, BookOpen, Calendar, Wand2, Copy, Check, Save, DollarSign, Instagram, Facebook, Sparkles, Download } from 'lucide-react';
+
+// Dynamic import for React-PDF elements to prevent SSR errors
+const PDFDownloadLink = dynamic(
+  () => import('@react-pdf/renderer').then(mod => mod.PDFDownloadLink),
+  { ssr: false, loading: () => <button className={styles.btnSecondary} disabled>Preparando PDF...</button> }
+);
+const PlannerPDF = dynamic(
+  () => import('../../components/PlannerPDF').then(mod => mod.PlannerPDF),
+  { ssr: false }
+);
 
 export default function PlannerPage() {
   const [clients, setClients] = useState<any[]>([]);
@@ -116,6 +127,19 @@ export default function PlannerPage() {
                 <Save size={18} /> Salvar no Histórico
               </button>
             )}
+            
+            {generatedPosts && (
+               <PDFDownloadLink
+                  document={<PlannerPDF clientName={clients.find(c => c.id === selectedClient)?.name} month={month} campaignFocus={campaignFocus} posts={generatedPosts} />}
+                  fileName={`Planner_${clients.find(c => c.id === selectedClient)?.name || 'Cliente'}_${month || 'Mes'}.pdf`}
+                  className={styles.btnSecondary}
+                  style={{ textDecoration: 'none', backgroundColor: '#E50914', color: 'white', border: 'none' }}
+               >
+                 {/* @ts-ignore */}
+                 {({ blob, url, loading, error }) => loading ? 'Gerando Documento...' : <><Download size={18} /> Baixar PDF Premium</>}
+               </PDFDownloadLink>
+            )}
+            
             <button 
               onClick={handleGenerate} 
               disabled={generating} 
