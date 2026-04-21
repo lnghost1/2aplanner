@@ -136,23 +136,28 @@ Estrutura EXATA e IMUTÁVEL que cada objeto deve seguir:
         break; // Sucesso — para de tentar outros modelos
       } catch (modelErr: any) {
         const msg = modelErr?.message || '';
-        const is503 = msg.includes('503') || msg.includes('Service Unavailable') || msg.includes('high demand');
+        const shouldFallback = msg.includes('503') || 
+                               msg.includes('Service Unavailable') || 
+                               msg.includes('high demand') ||
+                               msg.includes('429') ||
+                               msg.includes('quota') ||
+                               msg.includes('Too Many Requests');
         
-        if (is503) {
-          console.warn(`[generate] ${modelName} indisponível (503), tentando próximo modelo...`);
+        if (shouldFallback) {
+          console.warn(`[generate] ${modelName} falhou com erro recuperável (${msg}), tentando próximo modelo...`);
           lastError = modelErr;
-          // Aguarda 1 segundo antes de tentar o próximo modelo
+          // Aguarda 1 segundo antes de tentar o próximo modelo (evitar rate limit massivo)
           await new Promise(r => setTimeout(r, 1000));
           continue;
         }
         
-        // Para erros que não são 503, falha imediatamente (ex: API key inválida)
+        // Para erros críticos de syntax ou chave inválida, falha imediatamente
         throw modelErr;
       }
     }
 
     if (!raw) {
-      throw lastError || new Error('Todos os modelos estão indisponíveis no momento. Tente novamente em alguns segundos.');
+      throw lastError || new Error('Todos os modelos estão indisponíveis ou extrapolaram o limite de quota. Aguarde uns minutos e tente novamente.');
     }
 
     // Extrai JSON robusto — handles markdown fences e texto extra
@@ -165,9 +170,12 @@ Estrutura EXATA e IMUTÁVEL que cada objeto deve seguir:
     console.error('[generate/route] Error:', err.message);
     
     // Mensagem de erro amigável para o usuário
-    const userMessage = err.message?.includes('503') || err.message?.includes('high demand')
-      ? 'Os servidores da IA estão sobrecarregados agora. Aguarde 30 segundos e tente novamente.'
-      : err.message;
+    let userMessage = err.message;
+    if (userMessage?.includes('503') || userMessage?.includes('high demand')) {
+      userMessage = 'Os servidores da IA estão sobrecarregados agora. Aguarde 30 segundos e tente novamente.';
+    } else if (userMessage?.includes('429') || userMessage?.includes('quota')) {
+      userMessage = 'O limite de uso (quota) da API do Google Gemini estourou. Revise a conta do Google Cloud e tente de novo mais tarde.';
+    }
     
     return NextResponse.json({ error: userMessage }, { status: 500 });
   }
