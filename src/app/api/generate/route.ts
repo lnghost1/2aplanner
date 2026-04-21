@@ -129,7 +129,12 @@ Estrutura EXATA e IMUTÁVEL que cada objeto deve seguir:
     for (const modelName of MODEL_CHAIN) {
       try {
         console.log(`[generate] Tentando modelo: ${modelName}`);
-        const model = genAI.getGenerativeModel({ model: modelName });
+        const model = genAI.getGenerativeModel({ 
+          model: modelName,
+          generationConfig: {
+            responseMimeType: "application/json"
+          }
+        });
         const result = await model.generateContent(prompt);
         raw = result.response.text();
         lastError = null;
