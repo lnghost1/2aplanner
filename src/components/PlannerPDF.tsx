@@ -271,7 +271,7 @@ export const PlannerPDF = ({ clientName, month, campaignFocus, posts }: any) => 
         <View style={styles.posicionamentoBox}>
           <Text style={styles.posLabel}>POSICIONAMENTO</Text>
           <Text style={styles.posText}>
-            "Posicionar a {clientName} como a escolha definitiva e referência máxima no seu setor, sendo reconhecida pela agilidade, confiança e proximidade com o cliente. Destacar os grandes diferenciais operacionais para reduzir incertezas comuns do mercado."
+            &quot;Posicionar a {clientName} como a escolha definitiva e referência máxima no seu setor, sendo reconhecida pela agilidade, confiança e proximidade com o cliente. Destacar os grandes diferenciais operacionais para reduzir incertezas comuns do mercado.&quot;
           </Text>
         </View>
       </Page>
