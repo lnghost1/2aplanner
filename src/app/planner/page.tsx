@@ -28,8 +28,16 @@ export default function PlannerPage() {
   
   const [generating, setGenerating] = useState(false);
   const [generatedPosts, setGeneratedPosts] = useState<any[] | null>(null);
-  const [activeTabs, setActiveTabs] = useState<{[key: number]: string}>({});
+  const [activeTabs, setActiveTabs] = useState<Record<number, string>>({});
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+
+  const handleEditPost = (index: number, field: string, value: string) => {
+    if (!generatedPosts) return;
+    const updated = [...generatedPosts];
+    updated[index] = { ...updated[index], [field]: value };
+    setGeneratedPosts(updated);
+  };
+
 
   useEffect(() => {
     const loadClients = async () => {
@@ -210,7 +218,12 @@ export default function PlannerPage() {
               <div key={post.id || idx} className={styles.postCard}>
                 <div className={styles.postHeader}>
                   <span className={styles.postTag}>Post #{idx + 1}</span>
-                  <h3 className={styles.postTopic}>{post.topic}</h3>
+                  <input 
+                    className={styles.postTopic} 
+                    value={post.topic || ''} 
+                    onChange={e => handleEditPost(idx, 'topic', e.target.value)}
+                    style={{ background: 'transparent', border: '1px dashed #333', color: 'inherit', font: 'inherit', width: '100%', borderRadius: '4px', padding: '4px' }}
+                  />
                   {post.format && (
                     <span style={{ fontSize: '0.7rem', color: '#888', background: '#1a1a1a', padding: '4px 8px', borderRadius: '6px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                       {post.format}
@@ -260,7 +273,12 @@ export default function PlannerPage() {
 
                   {activeTabs[post.id] === 'caption' && (
                     <div className={styles.captionArea}>
-                      <pre className={styles.captionText}>{post.caption}</pre>
+                      <textarea 
+                        className={styles.captionText} 
+                        value={post.caption || ''} 
+                        onChange={e => handleEditPost(idx, 'caption', e.target.value)}
+                        style={{ width: '100%', minHeight: '200px', background: 'transparent', border: 'none', color: 'inherit', font: 'inherit', resize: 'vertical' }} 
+                      />
                       <button 
                         className={styles.copyButtonSmall}
                         onClick={() => handleCopy(post.caption, idx)}
@@ -273,7 +291,12 @@ export default function PlannerPage() {
 
                   {activeTabs[post.id] === 'video' && (
                     <div className={styles.videoArea}>
-                      <pre className={styles.videoText}>{post.video_script}</pre>
+                      <textarea 
+                        className={styles.videoText} 
+                        value={post.video_script || ''} 
+                        onChange={e => handleEditPost(idx, 'video_script', e.target.value)}
+                        style={{ width: '100%', minHeight: '150px', background: 'transparent', border: 'none', color: 'inherit', font: 'inherit', resize: 'vertical' }} 
+                      />
                     </div>
                   )}
 
