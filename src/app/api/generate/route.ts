@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server';
-import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { getSupabase } from '../../../lib/supabase';
 import { getBunkerContent, getNotionClients } from '../../../lib/notion';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || '',
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 const PLATFORM_RULES: Record<string, string> = {
   Instagram: `
@@ -85,8 +83,7 @@ Para Roteiros de VÍDEO (Reels/TikTok): Apele para hook visual em 3s, dinâmicas
 Para Roteiros de POSTS ESTÁTICOS (Instagram Carousel/Facebook): Apele para tempo de tela através da leitura, copy estruturada em blocos respiráveis B2H (Pessoa pra Pessoa) e forte peso emocional (Storytelling).
 
 [ARQUITETURA DO CALENDÁRIO: GERAR EXACTAMENTE UM ARRAY COM ${totalCount} OBJETOS]
-Você deve gerar EXATAMENTE ${totalCount} peças de conteúdo.
-Sendo OBRIGATORIAMENTE:
+Você deve gerar EXATAMENTE ${totalCount} peças de conteúdo NESTE JSON, sendo OBRIGATORIAMENTE:
 - ${videoCount} peças no formato "Vídeo Curto (Reels/TikTok)"
 - ${postCount} peças no formato "Post Estático/Carrossel"
 
@@ -96,61 +93,93 @@ Sua entrega combinada deve contar uma narrativa distribuída entre essa contagem
 - Agitação Subconsciente e Oferta/Solução Racional (Fundo de Funil).
 
 ### INSTRUÇÕES TÉCNICAS DO OUTPUT (RÍGOR JSON TOTAL)
-Você deve gerar um OBJETO JSON contendo UMA ÚNICA CHAVE chamada "posts", que é o array com as peças.
-NUNCA explique a estratégia. NUNCA adicione markdown a não ser o próprio JSON validado.
+Você deve gerar APENAS texto que possa ser imediatamente processado como JSON. JSON PURO E ESTRITO.
+NUNCA explique a estratégia. NUNCA adicione \`\`\`json. NUNCA faça notas de encerramento. Apenas o array.
 
-Estrutura EXATA e IMUTÁVEL:
-{
-  "posts": [
-    {
-      "id": 1,
-      "topic": "A Grande Ideia (Conceito central em até 8 palavras que gerem curiosidade)",
-      "format": "(Reels Dinâmico | Carrossel Narrativo | Feed Estático Impactante)",
-      "strategy": "Engenharia Reversa da Estratégia (Qual viés cognitivo embasa este post? Ex: Viés da Escassez, Paradoxo da Escolha, Aversão à Perda, Inimigo Comum)",
-      "hook_options": [
-        "GANCHO 1: A Dor Aguda (focado exclusivamente na sintomatologia do avatar)",
-        "GANCHO 2: Quebra de Padrão Cognitivo (algo totalmente anti-senso comum na área)",
-        "GANCHO 3: A Promessa Direta e Irrecusável"
-      ],
-      "caption": "Copyweight Premium completa. Comece com um dos Hooks integrados e quebre as linhas estruturalmente de maneira genial \\n\\nDesenvolva focando em retenção -> Agite a ferida -> Mostre evidências -> \\nFinalize com um CTA de ALTA FRICÇÃO ou RESPOSTA IMEDIATA que o algoritmo ama. Não economize palavras.",
-      "video_script": "INSTRUÇÃO CIRÚRGICA. Se Reels: Cena a Cena técnico. [0:00-0:03]: B-Roll rápido - Texto tela: (HOoK). [0:03-0:15]: Jump cuts narrando o problema. [0:15-0:20]: Conclusão rápida + Seta pra Legenda. || Se Estático: Descreva a psicologia estética da imagem (Cores, Foco, Textos).",
-      "visual_suggestion": "Instruções diretas pro Designer: Paleta agressiva ou luxuosa? Tipografia gigante? Existência de Rostos ou Apenas Produto em Câmera Macro?",
-      "hashtags": "3 a 5 tags hiper-ninchadas que rankeiam invisivelmente"
-    }
-  ]
-}
+Estrutura EXATA e IMUTÁVEL que cada objeto deve seguir:
+[
+  {
+    "id": 1,
+    "topic": "A Grande Ideia (Conceito central em até 8 palavras que gerem curiosidade)",
+    "format": "(Reels Dinâmico | Carrossel Narrativo | Feed Estático Impactante)",
+    "strategy": "Engenharia Reversa da Estratégia (Qual viés cognitivo embasa este post? Ex: Viés da Escassez, Paradoxo da Escolha, Aversão à Perda, Inimigo Comum)",
+    "hook_options": [
+      "GANCHO 1: A Dor Aguda (focado exclusivamente na sintomatologia do avatar)",
+      "GANCHO 2: Quebra de Padrão Cognitivo (algo totalmente anti-senso comum na área)",
+      "GANCHO 3: A Promessa Direta e Irrecusável"
+    ],
+    "caption": "Copyweight Premium completa. Comece com um dos Hooks integrados e quebre as linhas estruturalmente de maneira genial \\n\\nDesenvolva focando em retenção -> Agite a ferida -> Mostre evidências -> \nFinalize com um CTA de ALTA FRICÇÃO ou RESPOSTA IMEDIATA que o algoritmo ama. Não economize palavras.",
+    "video_script": "INSTRUÇÃO CIRÚRGICA. Se Reels: Cena a Cena técnico. [0:00-0:03]: B-Roll rápido - Texto tela: (HOoK). [0:03-0:15]: Jump cuts narrando o problema. [0:15-0:20]: Conclusão rápida + Seta pra Legenda. || Se Estático: Descreva a psicologia estética da imagem (Cores, Foco, Textos).",
+    "visual_suggestion": "Instruções diretas pro Designer: Paleta agressiva ou luxuosa? Tipografia gigante? Existência de Rostos ou Apenas Produto em Câmera Macro?",
+    "hashtags": "3 a 5 tags hiper-ninchadas que rankeiam invisivelmente"
+  }
+]
 `;
 
-    // Chamada à API da OpenAI (ChatGPT) com gpt-4o e JSON Mode forçado
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        { role: "system", content: "Você é um gerador de planejamento JSON puro." },
-        { role: "user", content: prompt }
-      ],
-      response_format: { type: "json_object" },
-      temperature: 0.7,
-    });
+    // Cadeia de fallback de modelos — tenta o melhor primeiro, cai para o próximo em caso de 503
+    const MODEL_CHAIN = [
+      'gemini-2.5-flash',
+      'gemini-2.0-flash',
+      'gemini-1.5-flash',
+    ];
 
-    const raw = completion.choices[0].message.content || '{"posts": []}';
-    
-    // Parse da resposta limpa de JSON extraída
-    const data = JSON.parse(raw);
-    const posts = data.posts || [];
-    
-    if (!posts || posts.length === 0) {
-      throw new Error('O ChatGPT retornou um JSON vazio. Tente novamente.');
+    let raw = '';
+    let lastError: any = null;
+
+    for (const modelName of MODEL_CHAIN) {
+      try {
+        console.log(`[generate] Tentando modelo: ${modelName}`);
+        const model = genAI.getGenerativeModel({ 
+          model: modelName,
+          generationConfig: {
+            responseMimeType: "application/json"
+          }
+        });
+        const result = await model.generateContent(prompt);
+        raw = result.response.text();
+        lastError = null;
+        break; // Sucesso — para de tentar outros modelos
+      } catch (modelErr: any) {
+        const msg = modelErr?.message || '';
+        const shouldFallback = msg.includes('503') || 
+                               msg.includes('Service Unavailable') || 
+                               msg.includes('high demand') ||
+                               msg.includes('429') ||
+                               msg.includes('quota') ||
+                               msg.includes('Too Many Requests');
+        
+        if (shouldFallback) {
+          console.warn(`[generate] ${modelName} falhou com erro recuperável (${msg}), tentando próximo modelo...`);
+          lastError = modelErr;
+          // Aguarda 1 segundo antes de tentar o próximo modelo (evitar rate limit massivo)
+          await new Promise(r => setTimeout(r, 1000));
+          continue;
+        }
+        
+        // Para erros críticos de syntax ou chave inválida, falha imediatamente
+        throw modelErr;
+      }
     }
 
+    if (!raw) {
+      throw lastError || new Error('Todos os modelos estão indisponíveis ou extrapolaram o limite de quota. Aguarde uns minutos e tente novamente.');
+    }
+
+    // Extrai JSON robusto — handles markdown fences e texto extra
+    const jsonMatch = raw.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) throw new Error('A IA não retornou um JSON válido. Tente novamente.');
+
+    const posts = JSON.parse(jsonMatch[0]);
     return NextResponse.json(posts);
   } catch (err: any) {
     console.error('[generate/route] Error:', err.message);
     
+    // Mensagem de erro amigável para o usuário
     let userMessage = err.message;
-    if (userMessage?.includes('401') || userMessage?.includes('invalid_api_key')) {
-      userMessage = 'Chave da OpenAI (ChatGPT) inválida ou ausente. Verifique o arquivo .env.local ou as variáveis na Vercel (OPENAI_API_KEY).';
+    if (userMessage?.includes('503') || userMessage?.includes('high demand')) {
+      userMessage = 'Os servidores da IA estão sobrecarregados agora. Aguarde 30 segundos e tente novamente.';
     } else if (userMessage?.includes('429') || userMessage?.includes('quota')) {
-      userMessage = 'O limite de uso (quota) da API do ChatGPT estourou, ou você precisa adicionar créditos à sua conta OpenAI.';
+      userMessage = 'O limite de uso (quota) da API do Google Gemini estourou. Revise a conta do Google Cloud e tente de novo mais tarde.';
     }
     
     return NextResponse.json({ error: userMessage }, { status: 500 });
